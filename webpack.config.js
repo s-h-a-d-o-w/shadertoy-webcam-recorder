@@ -1,9 +1,17 @@
 const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-module.exports = {
+const config = {
 	mode: 'production',
+
+	resolve: {
+		alias: {
+			'react': 'react-lite',
+			'react-dom': 'react-lite'
+		},
+	},
 
 	// Each entry has an array assigned so that webpack-hot-middleware can be merged into it in dev.
 	// See: https://github.com/webpack-contrib/webpack-hot-middleware#use-with-multiple-entry-points-in-webpack
@@ -34,3 +42,8 @@ module.exports = {
 		}],
 	},
 };
+
+if(process.env.BUNDLE_ANALYZER)
+	config.plugins.push(new BundleAnalyzerPlugin());
+
+module.exports = config;
