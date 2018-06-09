@@ -11,6 +11,8 @@
     "start:analyzer": "cross-env BUNDLE_ANALYZER=true webpack"
   },
   "dependencies": {
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
     "react-lite": "^0.15.39"
   },
   "devDependencies": {

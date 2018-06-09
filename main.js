@@ -13,6 +13,9 @@ if(isDev) {
 	const configDev = require('./webpack.config.dev.js');
 	const config = webpackMerge(configProd, configDev);
 
+	// Don't use react-lite in dev, as react devtools don't work with it
+	Reflect.deleteProperty(config, 'resolve');
+
 	const compiler = webpack(config);
 
 	// Tell express to use the webpack-dev-middleware and use the
