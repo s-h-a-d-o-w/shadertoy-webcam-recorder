@@ -1,11 +1,8 @@
 // Based on these examples:
 // https://github.com/mdn/webgl-examples/blob/gh-pages/tutorial/sample5/webgl-demo.js
 // https://webglfundamentals.org/webgl/lessons/webgl-render-to-texture.html
-
-var video = document.querySelector('video');
-var textureUpdateable = false;
-
-var cubeRotation = 0.0;
+import mat4 from 'gl-mat4';
+import Stats from 'stats-js';
 
 // Now create an array of positions for the cube.
 const positions = [
@@ -16,13 +13,7 @@ const positions = [
 	-1.0,  1.0, -1.0,
 ];
 
-
-main();
-
-//
-// Start here
-//
-function main(gl) {
+const start = (gl, video) => {
 	// Vertex shader program
 	const vsSource = `
 		attribute vec4 aVertexPosition;
@@ -43,11 +34,10 @@ function main(gl) {
 	// [0] = main shader
 	const fsSources = [`
 		void main(void) {
+			vec4 texel = texture2D(iChannel0, vTextureCoord);
+			gl_FragColor = vec4(1.0 - texel.x, 1.0 - texel.y, 1.0 - texel.z, 1.0);
+			
 			//gl_FragColor = vec4(vTextureCoord.x, vTextureCoord.y, 0.0, 1.0);
-			gl_FragColor = texture2D(iChannel0, vTextureCoord);
-	
-			//vec4 texel = texture2D(iChannel0, vTextureCoord);
-			//gl_FragColor = vec4(1.0 - texel.x, 1.0 - texel.y, 1.0 - texel.z, 1.0);
 	
 			//gl_FragColor = texture2D(iChannel1, vTextureCoord);
 		}
@@ -84,86 +74,68 @@ function main(gl) {
 	// ==============================================
 
 
-	let done = false;
-	video.addEventListener('playing', function() {
-		// Listener is trigger twice in quick succession - too quick
-		// for removeEventListener to finish in time.
-		// But this should only be executed once.
-		if(done) return;
-		done = true;
+	// Create textures for framebuffers
+	const targetTextureWidth = 1280; // TODO: probably change to video.videoWidth or something
+	const targetTextureHeight = 720;
+	const fbTextures = [];
+	const framebuffers = [];
 
-		console.log('Stream starts playing.');
+	for(let i = 0; i < fsSources.length - 1; i++) {
+		// TODO: All of this should probably be some "Buffer" class where each has an input texture,
+		// processes it, outputs it into framebuffer and then finally hands it off as output texture.
 
-		// Create textures for framebuffers
-		const targetTextureWidth = 1280; // TODO: probably change to video.videoWidth or something
-		const targetTextureHeight = 720;
-		const fbTextures = [];
-		const framebuffers = [];
+		fbTextures[i] = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, fbTextures[i]);
 
-		for(let i = 0; i < fsSources.length - 1; i++) {
-			// TODO: All of this should probably be some "Buffer" class where each has an input texture,
-			// processes it, outputs it into framebuffer and then finally hands it off as output texture.
+		// define size and format of level 0
+		const level = 0;
+		const internalFormat = gl.RGBA;
+		const border = 0;
+		const format = gl.RGBA;
+		const type = gl.UNSIGNED_BYTE;
+		const data = null;
+		gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+			targetTextureWidth, targetTextureHeight, border,
+			format, type, data);
 
-			fbTextures[i] = gl.createTexture();
-			gl.bindTexture(gl.TEXTURE_2D, fbTextures[i]);
+		// set the filtering so we don't need mips
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-			// define size and format of level 0
-			const level = 0;
-			const internalFormat = gl.RGBA;
-			const border = 0;
-			const format = gl.RGBA;
-			const type = gl.UNSIGNED_BYTE;
-			const data = null;
-			gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
-							targetTextureWidth, targetTextureHeight, border,
-							format, type, data);
+		// Create and bind the framebuffer
+		framebuffers[i] = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[i]);
 
-			// set the filtering so we don't need mips
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-			// Create and bind the framebuffer
-			framebuffers[i] = gl.createFramebuffer();
-			gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[i]);
-
-			// attach the texture as the first color attachment
-			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbTextures[i], level);
-		}
+		// attach the texture as the first color attachment
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fbTextures[i], level);
+	}
 
 
-		textureUpdateable = true;
-
-		var stats = new Stats();
-		stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-		stats.domElement.style.left = '10px';
-		document.body.appendChild(stats.dom);
+	var texTemp = loadTexture(gl, '720p-testpattern.png');
 
 
-		var texTemp = loadTexture(gl, '720p-testpattern.png');
+	var stats = new Stats();
+	stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+	stats.domElement.style.left = '10px';
+	document.body.appendChild(stats.dom);
 
-		// Draw the scene repeatedly
-		function render(now) {
-			stats.begin();
+	// Draw the scene repeatedly
+	function render(now) {
+		stats.begin();
 
-			// Fixed texture: 59 FPS
-			// Just streaming stuff from webcam without processing: Chrome 30 FPS, FF 30 FPS
-			drawScene(gl, programInfos, buffers, framebuffers, fbTextures, texWebcam, texTemp);
+		// Fixed texture: 59 FPS
+		// Just streaming stuff from webcam without processing: Chrome 30 FPS, FF 30 FPS
+		drawScene(gl, programInfos, buffers, framebuffers, fbTextures, texWebcam, texTemp);
 
-			// request animation frame in updateTexture, since we don't need to render unless there's a new frame
-			// from the webcam!
-			if(textureUpdateable)
-				updateTexture(gl, texWebcam, video, render);
-			else
-				// need to stupidly loop this until webcam stream becomes available
-				requestAnimationFrame(render);
+		// request animation frame in updateTexture, since we don't need to render unless there's a new frame
+		// from the webcam!
+		updateTexture(gl, texWebcam, video, render);
 
-			stats.end();
-			//requestAnimationFrame(render);
-		}
-		requestAnimationFrame(render);
-	}, true);
-}
+		stats.end();
+	}
+	requestAnimationFrame(render);
+};
 
 //
 // initBuffers
@@ -541,3 +513,4 @@ function loadShader(gl, type, source) {
 	return shader;
 }
 
+export {start};
