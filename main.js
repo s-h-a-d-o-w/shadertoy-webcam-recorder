@@ -1,33 +1,39 @@
-const electron = require('electron')
-const {app, BrowserWindow} = electron
+const express = require('express');
+const app = express();
 
-let mainWindow;
+const port = 3000;
+const isDev = !(process.env.NODE_ENV === 'production');
 
-// Quit when all windows are closed.
-app.on('window-all-closed', function() {
-  if (process.platform != 'darwin')
-    app.quit();
-});
+if(isDev) {
+	const webpack = require('webpack');
+	const webpackMerge = require('webpack-merge');
+	const webpackDevMiddleware = require('webpack-dev-middleware');
 
-// This method will be called when Electron has done everything
-// initialization and ready for creating browser windows.
-app.on('ready', function() {
-  // Create the browser window.
-  // Hidden, so that it can be maximized before being shown.
-  mainWindow = new BrowserWindow({width: 800, height: 600, show: false });
-  mainWindow.maximize();
-  mainWindow.openDevTools();
-  mainWindow.show();
+	const configProd = require('./webpack.config.js');
+	const configDev = require('./webpack.config.dev.js');
+	const config = webpackMerge(configProd, configDev);
 
-  // and load the index.html of the app.
-  mainWindow.loadURL('file://' + __dirname + '/index.html');
+	const compiler = webpack(config);
 
-  // Emitted when the window is closed.
-  mainWindow.on('closed', function() {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    mainWindow = null;
-  });
+	// Tell express to use the webpack-dev-middleware and use the
+	// merged webpack configs as a base.
+	app.use(webpackDevMiddleware(compiler, {
+		publicPath: config.output.publicPath,
+		stats: {
+			// Older versions of electron produce garbled output because of formatting in Windows.
+			// (Newer versions seem to strip formatting from the get go)
+			// https://github.com/electron/electron/issues/11488
+			colors: true,
+			modules: false, // Hide log output about all successfully built modules
+		},
+	}));
+	app.use(require("webpack-hot-middleware")(compiler));
+}
+else {
+	console.log('Using production bundle');
+	app.use(express.static(__dirname + '/dist'));
+}
 
+app.listen(port, function () {
+	console.log(`Listening on port ${port}!\n`);
 });
