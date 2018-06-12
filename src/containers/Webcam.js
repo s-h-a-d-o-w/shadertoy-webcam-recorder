@@ -9,6 +9,13 @@ const StyledWebcam = styled.div`
 	height: 100%;
 `;
 
+const StyledCanvas = styled.canvas`
+	position: relative;
+	left: 50%;
+	top: 50%;
+	transform-origin: center center;
+`;
+
 class Webcam extends React.Component {
 	constructor(props) {
 		super(props);
@@ -25,7 +32,11 @@ class Webcam extends React.Component {
 			if(done) return;
 			done = true;
 
-			console.log('Stream starts playing.');
+			console.log('Starting WebGL rendering');
+
+			// Set canvas size to match actual video resolution
+			//let cnv = this.refCanvas.current;
+			//cnv.width = this.video;
 
 			GLRenderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
 		}, true);
@@ -35,15 +46,12 @@ class Webcam extends React.Component {
 		// TODO: Would be nice to restart Renderer here to enable hot reloading for e.g. shaders
 
 		// Probably triggered by HMR, so let's restart renderer
-		console.log('componentDidUpdate');
 		//GLRenderer.stop();
 		//GLRenderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
 	};
 
 	componentDidMount = () => {
-		console.log('componentDidMount');
-
-		// Prepare video tag and its event listener that will receive webcam stream
+		// Prepare video tag and its event listeners that will receive webcam stream
 		this.video = document.createElement('video');
 		this.video.autoplay = true;
 		this.video.style.display = 'none';
@@ -52,14 +60,22 @@ class Webcam extends React.Component {
 		// Get webcam stream
 		const constraints = {
 			audio: false,
+			// TODO: Since getCapabilities() still isn't supported, do the trial & error workaround for
+			// finding max. resolution...
 			video: { width: {exact: 1280}, height: {exact: 720} }
 		};
 
 		const handleSuccess = (stream) => {
 			const videoTracks = stream.getVideoTracks();
-			console.log('Got stream with constraints:', constraints);
-			console.log('Using video device: ' + videoTracks[0].label);
-			stream.oninactive = () => console.log('Stream inactive');
+			const videoSettings = videoTracks[0].getSettings();
+			console.log('Using video device:', videoTracks[0].label);
+			console.log('Stream settings:', videoSettings);
+
+			console.log('Setting canvas size based on video stream');
+			this.refCanvas.current.width = videoSettings.width;
+			this.refCanvas.current.height = videoSettings.height;
+			this.handleResize(); // trigger once to calculate current scale
+
 			//window.stream = stream; // make variable available to browser console
 			this.video.srcObject = stream;
 		};
@@ -81,18 +97,29 @@ class Webcam extends React.Component {
 		.catch(handleError);
 
 		// Resize canvas to fill parent but keep aspect ratio
-		window.addEventListener('resize', this.handleResize);
+		window.addEventListener('resize', () => {requestAnimationFrame(this.handleResize)});
 	};
 
-	handleResize = (e) => {
+	// Resizes canvas while keeping aspect ratio
+	handleResize = () => {
+		let cnv = this.refCanvas.current;
+		if(cnv) {
+			// TODO: Would be nice to use cnv.parentNode as base for scale calculation instead of
+			// window but offsetWidth/-Height didn't work (reported dimensions a bit too small).
+			let scale = Math.min(
+				window.innerWidth / 1280, // TODO: replace fixed values with video resolution
+				window.innerHeight / 720
+			);
 
+			cnv.style.transform = `translate(-50%, -50%) scale(${scale})`;
+		}
 	};
 
 	render = () => {
 		console.log('render');
 		return (
 			<StyledWebcam>
-				<canvas ref={this.refCanvas} width={1280} height={720} />
+				<StyledCanvas innerRef={this.refCanvas} />
 			</StyledWebcam>
 		);
 	};
