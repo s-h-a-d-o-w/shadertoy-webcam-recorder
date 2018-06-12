@@ -128,8 +128,8 @@ const start = (gl, video) => {
 		// Just streaming stuff from webcam without processing: Chrome 30 FPS, FF 30 FPS
 		drawScene(gl, programInfos, buffers, framebuffers, fbTextures, texWebcam, texTemp);
 
-		// request animation frame in updateTexture, since we don't need to render unless there's a new frame
-		// from the webcam!
+		// Request animation frame in updateTexture, since we should wait for the texture to have gotten uploaded
+		// successfully before requesting the next frame (especially in Chrome, where upload takes forever)
 		updateTexture(gl, texWebcam, video, render);
 
 		stats.end();

@@ -1,5 +1,21 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './components/App.js';
+import {render} from 'react-dom';
+import Immutable from "immutable";
+import {Provider} from 'react-redux';
+import {createStore} from 'redux';
 
-ReactDOM.render(<App />, document.getElementById('app'));
+import App from './components/App.js';
+import rootReducer from './reducers'
+
+const store = createStore(
+	rootReducer,
+	Immutable.Map(),
+	window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
+
+render(
+	<Provider store={store}>
+		<App />
+	</Provider>,
+	document.getElementById('app')
+);

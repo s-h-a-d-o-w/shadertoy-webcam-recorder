@@ -1,15 +1,22 @@
 import React from 'react';
 import * as GLRenderer from '../utils/GLRenderer.js';
+import styled from 'styled-components';
+
+const StyledWebcam = styled.div`
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+`;
 
 class Webcam extends React.Component {
-	componentDidUpdate() {
-		// Probably triggered by HMR, so let's restart renderer
-		console.log('componentDidUpdate');
-		//GLRenderer.stop();
-		//GLRenderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
+	constructor(props) {
+		super(props);
+		this.refCanvas = React.createRef();
 	}
 
-	addPlayingListener = () => {
+	// Kicks off canvas rendering once stream starts to play
+	addVideoPlayingListener = () => {
 		let done = false;
 		this.video.addEventListener('playing', () => {
 			// Listener is trigger twice in quick succession - too quick
@@ -24,21 +31,25 @@ class Webcam extends React.Component {
 		}, true);
 	};
 
-	constructor() {
-		super();
-		this.refCanvas = React.createRef();
-	}
+	componentDidUpdate = () => {
+		// TODO: Would be nice to restart Renderer here to enable hot reloading for e.g. shaders
 
-	componentDidMount() {
+		// Probably triggered by HMR, so let's restart renderer
+		console.log('componentDidUpdate');
+		//GLRenderer.stop();
+		//GLRenderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
+	};
+
+	componentDidMount = () => {
 		console.log('componentDidMount');
 
+		// Prepare video tag and its event listener that will receive webcam stream
 		this.video = document.createElement('video');
 		this.video.autoplay = true;
 		this.video.style.display = 'none';
+		this.addVideoPlayingListener();
 
-		this.addPlayingListener();
-
-		// Put variables in global scope to make them available to the browser console.
+		// Get webcam stream
 		const constraints = {
 			audio: false,
 			video: { width: {exact: 1280}, height: {exact: 720} }
@@ -68,17 +79,23 @@ class Webcam extends React.Component {
 		navigator.mediaDevices.getUserMedia(constraints)
 		.then(handleSuccess)
 		.catch(handleError);
-	}
 
-	render() {
+		// Resize canvas to fill parent but keep aspect ratio
+		window.addEventListener('resize', this.handleResize);
+	};
+
+	handleResize = (e) => {
+
+	};
+
+	render = () => {
 		console.log('render');
 		return (
-			<div>
-				Webcam:
+			<StyledWebcam>
 				<canvas ref={this.refCanvas} width={1280} height={720} />
-			</div>
+			</StyledWebcam>
 		);
-	}
+	};
 }
 
 export default Webcam;
