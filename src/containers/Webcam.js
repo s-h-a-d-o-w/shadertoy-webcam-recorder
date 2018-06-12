@@ -1,5 +1,5 @@
 import React from 'react';
-import * as GLRenderer from '../utils/GLRenderer.js';
+import GLRenderer from '../utils/GLRenderer.js';
 import styled from 'styled-components';
 
 const StyledWebcam = styled.div`
@@ -33,21 +33,9 @@ class Webcam extends React.Component {
 			done = true;
 
 			console.log('Starting WebGL rendering');
-
-			// Set canvas size to match actual video resolution
-			//let cnv = this.refCanvas.current;
-			//cnv.width = this.video;
-
-			GLRenderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
+			this.renderer = new GLRenderer();
+			this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
 		}, true);
-	};
-
-	componentDidUpdate = () => {
-		// TODO: Would be nice to restart Renderer here to enable hot reloading for e.g. shaders
-
-		// Probably triggered by HMR, so let's restart renderer
-		//GLRenderer.stop();
-		//GLRenderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
 	};
 
 	componentDidMount = () => {
@@ -98,6 +86,13 @@ class Webcam extends React.Component {
 
 		// Resize canvas to fill parent but keep aspect ratio
 		window.addEventListener('resize', () => {requestAnimationFrame(this.handleResize)});
+	};
+
+	// Usually only triggered by HMR, so let's restart renderer (to enable e.g. "shader HMR")
+	componentDidUpdate = () => {
+		this.renderer.stop();
+		this.renderer = new GLRenderer();
+		this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
 	};
 
 	// Resizes canvas while keeping aspect ratio
