@@ -1,6 +1,7 @@
 import React from 'react';
-import GLRenderer from '../utils/GLRenderer.js';
 import styled from 'styled-components';
+import GLRenderer from '../utils/GLRenderer.js';
+import * as Recorder from '../utils/Recorder.js';
 
 const StyledWebcam = styled.div`
 	position: absolute;
@@ -35,6 +36,12 @@ class Webcam extends React.Component {
 			console.log('Starting WebGL rendering');
 			this.renderer = new GLRenderer();
 			this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
+
+			Recorder.init(
+				this.refCanvas.current,
+				this.video.srcObject.getVideoTracks()[0].getSettings().frameRate,
+				this.audio
+			);
 		}, true);
 	};
 
@@ -64,11 +71,15 @@ class Webcam extends React.Component {
 			this.refCanvas.current.height = videoSettings.height;
 			this.handleResize(); // trigger once to calculate current scale
 
-			//window.stream = stream; // make variable available to browser console
 			this.video.srcObject = stream;
+
+			// Save audio track for later
+			this.audio = stream.getAudioTracks()[0];
 		};
 
 		const handleError = (error) => {
+			// TODO: Show a more generic pop up error (but include an error ID for debugging?) to user
+
 			if(error.name === 'ConstraintNotSatisfiedError') {
 				console.error('The resolution ' + constraints.video.width.exact + 'x' +
 					constraints.video.width.exact + ' px is not supported by your device.');
