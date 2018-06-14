@@ -143,6 +143,8 @@ class GLRenderer {
 
 			// Request animation frame in _updateTexture, since we should wait for the texture to have gotten uploaded
 			// successfully before requesting the next frame (especially in Chrome, where upload takes forever)
+			// Also: There's no way of getting notified when the next video frame is done. So... grab the next one
+			// as quickly as possible - which may lead to unnecessary 60 FPS rendering for a 30 FPS video stream...
 			this._updateTexture(gl, texWebcam, video, render);
 
 			stats.end();

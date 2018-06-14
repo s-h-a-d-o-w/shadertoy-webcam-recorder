@@ -25,17 +25,23 @@ const config = {
 		new CopyWebpackPlugin([{
 			from: path.resolve(__dirname, 'src/index.html'),
 			to: path.resolve(__dirname, 'dist/index.html'),
-		}]),
+		}/*, {
+			from: path.resolve(__dirname, 'assets'),
+			to: path.resolve(__dirname, 'dist/assets'),
+		}*/
+		]),
 	],
 	output: {
 		filename: '[name].bundle.js',
+		chunkFilename: '[name].bundle.js',
 		path: path.resolve(__dirname, 'dist'),
 		publicPath: '/'
 	},
 	module: {
+		noParse: /ffmpeg/,
 		rules: [{
 			test: /\.(js|jsx)$/,
-			exclude: /node_modules/,
+			exclude: [/node_modules/, /ffmpeg/],
 			use: [
 				'babel-loader',
 			],

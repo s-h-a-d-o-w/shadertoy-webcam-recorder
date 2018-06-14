@@ -6,20 +6,24 @@ const reducer = (state, action) => {
 			Recorder.startRecording();
 			return state.set('isRecording', true);
 		case 'STOP_RECORD':
-			Recorder.stopRecording();
+			// TODO: UI indication that recording is being processed...
 
 			// Temp test download
-			var url = Recorder.getObjectURL();
-			var a = document.createElement('a');
-			a.style.display = 'none';
-			a.href = url;
-			a.download = 'test.webm';
-			document.body.appendChild(a);
-			a.click();
-			setTimeout(function() {
-				document.body.removeChild(a);
-				window.URL.revokeObjectURL(url);
-			}, 100);
+			Recorder.stopRecording()
+			.then(Recorder.getObjectURL)
+			.then((url) => {
+				var a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = 'output.webm';
+				document.body.appendChild(a);
+				a.click();
+				setTimeout(function() {
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(url);
+				}, 100);
+			})
+			.catch(e => console.error(e));
 
 			return state.set('isRecording', false);
 		default:

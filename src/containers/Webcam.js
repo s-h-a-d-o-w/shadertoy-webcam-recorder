@@ -37,6 +37,10 @@ class Webcam extends React.Component {
 			this.renderer = new GLRenderer();
 			this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
 
+
+			// TODO: Could using a web worker for recording resolve this issue?
+
+			// Reduces framerate to ~30 FPS (at least on my machine)
 			Recorder.init(
 				this.refCanvas.current,
 				this.video.srcObject.getVideoTracks()[0].getSettings().frameRate,
@@ -52,9 +56,20 @@ class Webcam extends React.Component {
 		this.video.style.display = 'none';
 		this.addVideoPlayingListener();
 
+		this.audio = document.createElement('audio');
+		this.audio.autoplay = true;
+		this.audio.style.display = 'none';
+
+
+		// TODO: Remove this on release? It's just annoying to hear stuff while developing...
+		// Recording is not affected.
+		this.video.muted = 'muted';
+		this.audio.muted = 'muted';
+
+
 		// Get webcam stream
 		const constraints = {
-			audio: false,
+			audio: true,
 			// TODO: Since getCapabilities() still isn't supported, do the trial & error workaround for
 			// finding max. resolution...
 			video: { width: {exact: 1280}, height: {exact: 720} }
@@ -73,8 +88,9 @@ class Webcam extends React.Component {
 
 			this.video.srcObject = stream;
 
-			// Save audio track for later
-			this.audio = stream.getAudioTracks()[0];
+			// Necessary because we need separate audio and getting it directly from the stream
+			// doesn't work. (Seems when using the stream directly, one HAS to record video/audio at once)
+			this.audio.srcObject = stream;
 		};
 
 		const handleError = (error) => {
@@ -94,6 +110,18 @@ class Webcam extends React.Component {
 		navigator.mediaDevices.getUserMedia(constraints)
 		.then(handleSuccess)
 		.catch(handleError);
+
+
+		/*
+		// Get audio
+		navigator.mediaDevices.getUserMedia({audio: true, video: false})
+		.then((stream) => {
+			let oida = new MediaRecorder(stream, {mimeType: 'audio/webm'});
+			this.audio = stream;
+		})
+		.catch(handleError);
+		*/
+
 
 		// Resize canvas to fill parent but keep aspect ratio
 		window.addEventListener('resize', () => {requestAnimationFrame(this.handleResize)});

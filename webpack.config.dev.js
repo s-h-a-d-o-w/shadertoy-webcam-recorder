@@ -8,7 +8,7 @@ module.exports = {
 	entry: {
 		app: ['webpack-hot-middleware/client'],
 	},
-	devtool: 'eval-source-map', // faster to rebuild than inline-source-map
+	//devtool: 'eval-source-map', // faster to rebuild than inline-source-map
 	//devtool: 'inline-source-map',
 	devServer: {
 		contentBase: './dist',
@@ -17,5 +17,8 @@ module.exports = {
 	plugins: [
 		new webpack.NamedModulesPlugin(),
 		new webpack.HotModuleReplacementPlugin(),
+		new webpack.EvalSourceMapDevToolPlugin({
+			exclude: /ffmpeg/
+		}),
 	],
 };
