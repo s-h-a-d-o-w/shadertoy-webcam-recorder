@@ -1,4 +1,5 @@
 const path = require('path');
+const UglifyJSWebpackPlugin = require('uglifyjs-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
@@ -6,11 +7,27 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const config = {
 	mode: 'production',
 
+	/*
+	// Doesn't work because createRef isn't supported in react-lite yet.
+	// TODO: Think about whether it's worth using old workflow in order to use react-lite
 	resolve: {
 		alias: {
 			'react': 'react-lite',
 			'react-dom': 'react-lite'
 		},
+	},
+	*/
+
+	optimization: {
+		minimizer: [
+			new UglifyJSWebpackPlugin({
+				uglifyOptions: {
+					compress: {
+						drop_console: true,
+					}
+				}
+			})
+		]
 	},
 
 	// Each entry has an array assigned so that webpack-hot-middleware can be merged into it in dev.
@@ -26,8 +43,8 @@ const config = {
 			from: path.resolve(__dirname, 'src/index.html'),
 			to: path.resolve(__dirname, 'dist/index.html'),
 		}, {
-			from: path.resolve(__dirname, 'src/ffmpeg/ffmpeg-worker-webm.js'),
-			to: path.resolve(__dirname, 'dist/ffmpeg/ffmpeg-worker-webm.js'),
+			from: path.resolve(__dirname, 'node_modules/ffmpeg.js/ffmpeg-worker-webm.js'),
+			to: path.resolve(__dirname, 'dist/ffmpeg-worker-webm.js'),
 		}/*, {
 			from: path.resolve(__dirname, 'assets'),
 			to: path.resolve(__dirname, 'dist/assets'),

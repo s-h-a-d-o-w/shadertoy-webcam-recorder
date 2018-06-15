@@ -37,10 +37,8 @@ class Webcam extends React.Component {
 			this.renderer = new GLRenderer();
 			this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
 
-
-			// TODO: Could using a web worker for recording resolve this issue?
-
-			// Reduces framerate to ~30 FPS (at least on my machine)
+			// Capturing stream reduces framerate to ~30 FPS (at least on my machine) and can't be separated
+			// into a different thread
 			Recorder.init(
 				this.refCanvas.current,
 				this.video.srcObject.getVideoTracks()[0].getSettings().frameRate,
@@ -53,8 +51,10 @@ class Webcam extends React.Component {
 		// Prepare video tag and its event listeners that will receive webcam stream
 		this.video = document.createElement('video');
 		this.video.autoplay = true;
-		this.video.style.display = 'none';
 		this.addVideoPlayingListener();
+		// Chrome requires video to be added to DOM and to be visible, otherwise video stream won't start
+		// Doesn't seem to impact performance, probably since it's behind the fullscreen UI anyway...
+		document.body.appendChild(this.video);
 
 		this.audio = document.createElement('audio');
 		this.audio.autoplay = true;
@@ -110,17 +110,6 @@ class Webcam extends React.Component {
 		navigator.mediaDevices.getUserMedia(constraints)
 		.then(handleSuccess)
 		.catch(handleError);
-
-
-		/*
-		// Get audio
-		navigator.mediaDevices.getUserMedia({audio: true, video: false})
-		.then((stream) => {
-			let oida = new MediaRecorder(stream, {mimeType: 'audio/webm'});
-			this.audio = stream;
-		})
-		.catch(handleError);
-		*/
 
 
 		// Resize canvas to fill parent but keep aspect ratio

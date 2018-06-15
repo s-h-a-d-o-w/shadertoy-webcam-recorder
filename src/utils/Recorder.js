@@ -16,7 +16,7 @@ function init(canvas, fps, audio) {
 	audioStream = audio;
 
 	// See ffmpeg.js docs
-	ffmpegWorker = new Worker('../ffmpeg/ffmpeg-worker-webm.js');
+	ffmpegWorker = new Worker('ffmpeg-worker-webm.js'); // Copying of this script is specified manually in webpack config
 	ffmpegWorker.onmessage = function(e) {
 		var msg = e.data;
 		if(msg.type === "ready")
@@ -26,13 +26,15 @@ function init(canvas, fps, audio) {
 
 // The nested try blocks will be simplified when Chrome 47 moves to Stable
 function startRecording() {
+	// Max. bitrates for Firefox seem to be around 23 mbit for video, 260 kbit for audio
 	let options = {
 		mimeType: 'video/webm',
-		videoBitsPerSecond: 15000000,
+		videoBitsPerSecond: 15 * 1000 * 1000,
 	};
 	videoBlobs = [];
 	audioBlobs = [];
 
+	// Create video recorder
 	try {
 		videoRecorder = new MediaRecorder(videoStream, options);
 	} catch(e0) {
@@ -53,19 +55,16 @@ function startRecording() {
 			}
 		}
 	}
-	console.log('Created MediaRecorder', videoRecorder, 'with options', options);
-
-	// Push recorded chunks
 	videoRecorder.ondataavailable = (event) => {
 		if(event.data && event.data.size > 0) {
 			videoBlobs.push(event.data);
 		}
 	};
 
+	// Create audio recorder
 	let captureStream = audioStream.captureStream || audioStream.mozCaptureStream;
 	audioRecorder = new MediaRecorder(captureStream.call(audioStream), {
-		//mimeType: 'audio/webm',
-		audioBitsPerSecond: 128000,
+		audioBitsPerSecond: 200 * 1000,
 	});
 	audioRecorder.ondataavailable = (event) => {
 		if(event.data && event.data.size > 0) {
@@ -73,7 +72,7 @@ function startRecording() {
 		}
 	};
 
-	// Collect 1000ms chunks of data
+	// Collect 1000 ms chunks of data
 	videoRecorder.start(1000);
 	audioRecorder.start(1000);
 

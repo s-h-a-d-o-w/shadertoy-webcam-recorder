@@ -14,7 +14,9 @@ if(isDev) {
 	const config = webpackMerge(configProd, configDev);
 
 	// Don't use react-lite in dev, as react devtools don't work with it
-	Reflect.deleteProperty(config, 'resolve');
+	//Reflect.deleteProperty(config, 'resolve');
+	// Don't remove console output in dev
+	Reflect.deleteProperty(config, 'optimization');
 
 	const compiler = webpack(config);
 
