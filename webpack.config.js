@@ -25,6 +25,9 @@ const config = {
 		new CopyWebpackPlugin([{
 			from: path.resolve(__dirname, 'src/index.html'),
 			to: path.resolve(__dirname, 'dist/index.html'),
+		}, {
+			from: path.resolve(__dirname, 'src/ffmpeg/ffmpeg-worker-webm.js'),
+			to: path.resolve(__dirname, 'dist/ffmpeg/ffmpeg-worker-webm.js'),
 		}/*, {
 			from: path.resolve(__dirname, 'assets'),
 			to: path.resolve(__dirname, 'dist/assets'),

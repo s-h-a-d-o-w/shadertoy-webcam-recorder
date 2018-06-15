@@ -14,12 +14,12 @@ const StyledApp = styled.div`
 		font-weight: normal;
 		font-style: normal;
 	}
-	
+
 	position:absolute;
 	margin: 0;
 	width: 100%;
 	height: 100%;
-	background-color: gray
+	background-color: dimgray;
 `;
 
 const App = () => (

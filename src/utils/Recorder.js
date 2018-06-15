@@ -1,7 +1,7 @@
 // Based on: https://github.com/webrtc/samples/blob/gh-pages/src/content/capture/canvas-record/js/main.js
 // And: https://github.com/muaz-khan/WebRTC-Experiment/blob/master/ffmpeg/audio-plus-canvas-recording.html
 
-let ffmpeg;
+let ffmpegWorker;
 
 let videoStream;
 let videoRecorder;
@@ -15,48 +15,21 @@ function init(canvas, fps, audio) {
 	videoStream = canvas.captureStream(fps);
 	audioStream = audio;
 
-	// TODO: This freezes the browser. Better solution?
-	import(/* webpackChunkName: "ffmpeg" */ '../ffmpeg/ffmpeg-webm.js').then(module => {
-		ffmpeg = module.default;
-		console.log('ffmpeg loaded!');
-	});
-
-	/*
-	fetch('assets/testv.webm').then((response) => {
-		if(response.ok) {
-			response.arrayBuffer().then(data => {
-				videoBuffer = data;
-				console.log('testv.webm loaded');
-			});
-		}
-		else {
-			var error = new Error(response.statusText + ' ' + response.url);
-			throw error;
-		}
-	}, function(error) {
-		console.error(error);
-	});
-
-	fetch('assets/testa.webm').then((response) => {
-		if(response.ok) {
-			response.arrayBuffer().then(data => {
-				audioBuffer = data;
-				console.log('testa.webm loaded');
-			});
-		}
-		else {
-			var error = new Error(response.statusText + ' ' + response.url);
-			throw error;
-		}
-	}, function(error) {
-		console.error(error);
-	});
-	*/
+	// See ffmpeg.js docs
+	ffmpegWorker = new Worker('../ffmpeg/ffmpeg-worker-webm.js');
+	ffmpegWorker.onmessage = function(e) {
+		var msg = e.data;
+		if(msg.type === "ready")
+			console.log('ffmpeg loaded!');
+	};
 }
 
 // The nested try blocks will be simplified when Chrome 47 moves to Stable
 function startRecording() {
-	let options = {mimeType: 'video/webm'};
+	let options = {
+		mimeType: 'video/webm',
+		videoBitsPerSecond: 15000000,
+	};
 	videoBlobs = [];
 	audioBlobs = [];
 
@@ -85,13 +58,15 @@ function startRecording() {
 	// Push recorded chunks
 	videoRecorder.ondataavailable = (event) => {
 		if(event.data && event.data.size > 0) {
-			console.log('Video Chunk:');
-			console.log(event.data);
 			videoBlobs.push(event.data);
 		}
 	};
 
-	audioRecorder = new MediaRecorder(audioStream.mozCaptureStream());
+	let captureStream = audioStream.captureStream || audioStream.mozCaptureStream;
+	audioRecorder = new MediaRecorder(captureStream.call(audioStream), {
+		//mimeType: 'audio/webm',
+		audioBitsPerSecond: 128000,
+	});
 	audioRecorder.ondataavailable = (event) => {
 		if(event.data && event.data.size > 0) {
 			audioBlobs.push(event.data);
@@ -124,8 +99,12 @@ function stopRecording() {
 	});
 }
 
+/**
+	Uses ffmpeg.js web worker version to merge video and audio streams.
+
+	@return {DOMString} Represents the blob of the recorded webm file
+ */
 function getObjectURL() {
-	// TODO: Use the web worker version instead
 	return new Promise((resolve, reject) => {
 		let videoBuffer;
 		let fileReader = new FileReader();
@@ -137,7 +116,19 @@ function getObjectURL() {
 			fileReaderInner.onload = function() {
 				audioBuffer = this.result;
 
-				let result = ffmpeg({
+				// Resolve once worker is done merging video and audio
+				ffmpegWorker.onmessage = function(e) {
+					var msg = e.data;
+					if(msg.type === "stderr") {
+						console.log('ffmpeg: ' + msg.data);
+					}
+					else if(msg.type === "done") {
+						resolve(window.URL.createObjectURL(new Blob([msg.data.MEMFS[0].data.buffer])));
+					}
+				};
+
+				ffmpegWorker.postMessage({
+					type: "run",
 					MEMFS: [
 						{name: "video.webm", data: new Uint8Array(videoBuffer)},
 						{name: "audio.webm", data: new Uint8Array(audioBuffer)},
@@ -148,20 +139,13 @@ function getObjectURL() {
 						'-c:v', 'copy',
 						'-c:a', 'copy',
 						'output.webm'
-					],
-					// Ignore stdin read requests.
-					stdin: function() {},
+					]
 				});
-
-				resolve(window.URL.createObjectURL(new Blob([result.MEMFS[0].data.buffer])));
 			};
-			//fileReaderInner.readAsArrayBuffer(audioBlobs[0]);
 			fileReaderInner.readAsArrayBuffer(new Blob(audioBlobs));
 		};
-		//fileReader.readAsArrayBuffer(videoBlobs[0]);
 		fileReader.readAsArrayBuffer(new Blob(videoBlobs));
 	});
-
 }
 
 

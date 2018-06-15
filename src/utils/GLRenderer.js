@@ -24,12 +24,12 @@ class GLRenderer {
 		const vsSource = `
 			attribute vec4 aVertexPosition;
 			attribute vec2 aTextureCoord;
-		
+
 			uniform mat4 uModelViewMatrix;
 			uniform mat4 uProjectionMatrix;
-		
+
 			varying highp vec2 vTextureCoord;
-		
+
 			void main(void) {
 				gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
 				vTextureCoord = aTextureCoord;
@@ -39,21 +39,28 @@ class GLRenderer {
 		// TODO: insert fragment shaders in the order in which they have to be rendered
 		// [0] = main shader
 		const fsSources = [`
+			#define steps 2.
 			void main(void) {
+				vec2 uv = vTextureCoord;
+				vec4 c = texture2D(iChannel0, uv);
+				float g = max(c.r, max(c.g,c.b)) * steps;
+				float val = 945.678; // +iMouse.x;
+				//float f = mod((uv.x + uv.y + 500.) * val, 1.);
+				if(mod(g, 1.0) > mod((uv.x + uv.y + 500.) * val, 1.))
+					c.r = ceil(g);
+				else
+					c.r = floor(g);
+				c.r /= steps;
+				gl_FragColor = c.rrra;
+
+				/*
 				vec4 texel = texture2D(iChannel0, vTextureCoord);
 				gl_FragColor = vec4(1.0 - texel.x, 1.0 - texel.y, 1.0 - texel.z, 1.0);
-				
-				//gl_FragColor = vec4(vTextureCoord.x, vTextureCoord.y, 0.0, 1.0);
-		
-				//gl_FragColor = texture2D(iChannel0, vTextureCoord);
+				*/
 			}
 			`,`
 			void main(void) {
-				//gl_FragColor = vec4(vTextureCoord.x, vTextureCoord.y, 0.0, 1.0);
-		
-				//vec4 texel = texture2D(iChannel0, vTextureCoord);
-				//gl_FragColor = vec4(1.0 - texel.x, 1.0 - texel.y, 1.0 - texel.z, 1.0);
-				
+				// Passing through input for multipass test
 				gl_FragColor = texture2D(iChannel0, vTextureCoord);
 			}
 		`];
@@ -325,7 +332,7 @@ class GLRenderer {
 			return `
 				precision mediump float;
 				varying highp vec2 vTextureCoord;
-				
+
 			` +
 				(new Array(numInputs))
 				.fill()
