@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import GLRenderer from '../utils/GLRenderer.js';
 import * as Recorder from '../utils/Recorder.js';
 
+import {connect} from 'react-redux';
+import {addDebugInfo} from '../actions';
+
 const StyledWebcam = styled.div`
 	position: absolute;
 	top: 0;
@@ -86,6 +89,10 @@ class Webcam extends React.Component {
 			this.refCanvas.current.height = videoSettings.height;
 			this.handleResize(); // trigger once to calculate current scale
 
+			this.props.dispatch(
+				addDebugInfo(`${videoSettings.width}x${videoSettings.height}@${videoSettings.frameRate}fps`)
+			);
+
 			this.video.srcObject = stream;
 
 			// Necessary because we need separate audio and getting it directly from the stream
@@ -148,4 +155,4 @@ class Webcam extends React.Component {
 	};
 }
 
-export default Webcam;
+export default connect()(Webcam);

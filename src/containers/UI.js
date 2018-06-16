@@ -9,16 +9,17 @@ const StyledUI = styled.div`
 	top: 0;
 	width: 100%;
 	height: 100%;
-	
+
 	display: flex;
 	align-items: flex-end;
 	justify-content: center;
-	
+
 	box-sizing: border-box;
 	padding: 5vh;
 	border: ${props => props.isRecording ? 0.5 : 0}vh solid red; // Only during recording!
-	
+
 	font-family: DSEG14-Classic, sans-serif;
+	color: white;
 `;
 
 const UI = (props) => (

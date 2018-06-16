@@ -1,7 +1,16 @@
 import * as Recorder from '../utils/Recorder.js';
+import Immutable from 'immutable';
 
 const reducer = (state, action) => {
 	switch (action.type) {
+		case 'ADD_DEBUG_INFO':
+			return state.set(
+				'debugInfos',
+				state.get(
+					'debugInfos',
+					Immutable.List()
+				).push(action.info)
+			);
 		case 'START_RECORD':
 			Recorder.startRecording();
 			return state.set('isRecording', true);

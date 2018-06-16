@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import DSEG14woff from '../../assets/DSEG14Classic-Regular.woff';
 import UI from '../containers/UI.js';
 import Webcam from '../containers/Webcam.js';
+import Debug from '../containers/Debug.js';
 
 const StyledApp = styled.div`
 	@font-face {
@@ -26,6 +27,7 @@ const App = () => (
 	<StyledApp>
 		<Webcam/>
 		<UI/>
+		<Debug/>
 	</StyledApp>
 );
 
