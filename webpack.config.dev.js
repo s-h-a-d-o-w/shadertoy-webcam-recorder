@@ -1,16 +1,20 @@
 const webpack = require('webpack');
+const webpackMerge = require('webpack-merge');
 
-// The base for this is webpack.config.js.
-// This is merged with it when NODE_ENV is development.
-module.exports = {
+const configProd = require('./webpack.config.js');
+const configDev = {
 	mode: 'development',
 
-	entry: {
-		app: ['webpack-hot-middleware/client'],
-	},
 	devServer: {
 		contentBase: './dist',
-		hot: true
+		hot: true,
+		port: 3000,
+		stats: {
+			modules: false,
+		}
+	},
+	entry: {
+		app: ['webpack-hot-middleware/client'],
 	},
 	plugins: [
 		new webpack.NamedModulesPlugin(),
@@ -18,5 +22,14 @@ module.exports = {
 		new webpack.EvalSourceMapDevToolPlugin({
 			exclude: /ffmpeg/
 		}),
-	],
-};
+	]
+}
+
+const config = webpackMerge(configProd, configDev);
+
+// Don't use react-lite in dev, as react devtools don't work with it
+//Reflect.deleteProperty(config, 'resolve');
+// Don't remove console output in dev
+Reflect.deleteProperty(config, 'optimization');
+
+module.exports = config;
