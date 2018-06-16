@@ -75,9 +75,9 @@ class Webcam extends React.Component {
 			audio: true,
 			// TODO: Possible problem on Chrome (desktop): Unlike Firefox, user doesn't get prompted to choose which camera to use
 			video: {
-				width: {ideal: 4096},
-				height: {ideal: 4096},
-				frameRate: {ideal: 60}
+				width: {ideal: 1920}, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
+				height: {ideal: 1920},
+				frameRate: {ideal: 30} // 60 fps might be possible on some devices but... see 4K above.
 			}
 		};
 
