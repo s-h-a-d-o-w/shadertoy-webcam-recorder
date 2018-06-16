@@ -37,7 +37,15 @@ const StyledDebug = styled.div`
 const Debug = (props) => (
 	<StyledDebug>
 		Debug Infos:<br/>
-		{props.debugInfos && props.debugInfos.toJS()}
+		{
+			props.debugInfos &&
+			props.debugInfos
+			.toJS()
+			.reduce( // Add <br> elements between infos
+				(acc, el) => acc.concat(el).concat(<br/>),
+				[]
+			)
+		}
 	</StyledDebug>
 );
 
