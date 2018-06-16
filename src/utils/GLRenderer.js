@@ -41,6 +41,7 @@ class GLRenderer {
 		const fsSources = [`
 			#define steps 2.
 			void main(void) {
+
 				vec2 uv = vTextureCoord;
 				vec4 c = texture2D(iChannel0, uv);
 				float g = max(c.r, max(c.g,c.b)) * steps;
@@ -53,10 +54,13 @@ class GLRenderer {
 				c.r /= steps;
 				gl_FragColor = c.rrra;
 
+
 				/*
 				vec4 texel = texture2D(iChannel0, vTextureCoord);
 				gl_FragColor = vec4(1.0 - texel.x, 1.0 - texel.y, 1.0 - texel.z, 1.0);
 				*/
+
+				//gl_FragColor = texture2D(iChannel0, vTextureCoord);
 			}
 			`,`
 			void main(void) {

@@ -5,10 +5,17 @@ import {connect} from 'react-redux';
 import RecordButton from '../components/RecordButton';
 
 const StyledDebug = styled.div`
+	/*
+		Hack to enable clicking of UI elements behind debug container:
+		https://stackoverflow.com/questions/1401658/html-overlay-which-allows-clicks-to-fall-through-to-elements-behind-it
+	*/
+	height:0px;
+	overflow:visible;
+	pointer-events:none;
+
 	position: absolute;
 	top: 0;
 	width: 100%;
-	height: 100%;
 
 	display: flex;
 	align-items: flex-start;

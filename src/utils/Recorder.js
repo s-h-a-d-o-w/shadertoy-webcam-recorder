@@ -26,35 +26,18 @@ function init(canvas, fps, audio) {
 
 // The nested try blocks will be simplified when Chrome 47 moves to Stable
 function startRecording() {
-	// Max. bitrates for Firefox seem to be around 23 mbit for video, 260 kbit for audio
-	let options = {
-		mimeType: 'video/webm',
-		videoBitsPerSecond: 15 * 1000 * 1000,
-	};
 	videoBlobs = [];
 	audioBlobs = [];
 
 	// Create video recorder
-	try {
-		videoRecorder = new MediaRecorder(videoStream, options);
-	} catch(e0) {
-		console.log('Unable to create MediaRecorder with options Object: ', e0);
-		try {
-			options = {mimeType: 'video/webm,codecs=vp9'};
-			videoRecorder = new MediaRecorder(videoStream, options);
-		} catch(e1) {
-			console.log('Unable to create MediaRecorder with options Object: ', e1);
-			try {
-				options = 'video/vp8'; // Chrome 47
-				videoRecorder = new MediaRecorder(videoStream, options);
-			} catch(e2) {
-				alert('MediaRecorder is not supported by this browser.\n\n' +
-					'Try Firefox 29 or later, or Chrome 47 or later, with Enable experimental Web Platform features enabled from chrome://flags.');
-				console.error('Exception while creating MediaRecorder:', e2);
-				return;
-			}
-		}
-	}
+	videoRecorder = new MediaRecorder(videoStream, {
+		mimeType: 'video/webm;codecs=vp8', // ensure that VP8 is used, since ffmpeg.js only works with this as of right now
+
+		// Bit rate is only a target - actual output usually has a much lower one.
+		// Seems to depend on content, as a crosshatch shader will result in a much higher
+		// bit rate (~13 MBit) versus simply passing through webcam stream (~7 MBit).
+		videoBitsPerSecond: 30 * 1000 * 1000,
+	});
 	videoRecorder.ondataavailable = (event) => {
 		if(event.data && event.data.size > 0) {
 			videoBlobs.push(event.data);
@@ -64,7 +47,7 @@ function startRecording() {
 	// Create audio recorder
 	let captureStream = audioStream.captureStream || audioStream.mozCaptureStream;
 	audioRecorder = new MediaRecorder(captureStream.call(audioStream), {
-		audioBitsPerSecond: 200 * 1000,
+		audioBitsPerSecond: 200 * 1000, // Firefox seems to respect this
 	});
 	audioRecorder.ondataavailable = (event) => {
 		if(event.data && event.data.size > 0) {
