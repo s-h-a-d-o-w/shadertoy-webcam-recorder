@@ -2,7 +2,7 @@
 // https://github.com/mdn/webgl-examples/blob/gh-pages/tutorial/sample5/webgl-demo.js
 // https://webglfundamentals.org/webgl/lessons/webgl-render-to-texture.html
 import mat4 from 'gl-mat4';
-import Stats from 'stats-js';
+import Stats from 'stats.js';
 
 // Utility functions
 const isPowerOf2 = (value) => {
