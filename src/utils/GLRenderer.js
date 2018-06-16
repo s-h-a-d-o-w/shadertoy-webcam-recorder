@@ -88,8 +88,9 @@ class GLRenderer {
 
 
 		// Create textures for framebuffers
-		const targetTextureWidth = 1280; // TODO: probably change to video.videoWidth or something
-		const targetTextureHeight = 720;
+		const videoSettings = video.srcObject.getVideoTracks()[0].getSettings();
+		const targetTextureWidth = videoSettings.width;
+		const targetTextureHeight = videoSettings.height;
 		const fbTextures = [];
 		const framebuffers = [];
 
@@ -125,7 +126,7 @@ class GLRenderer {
 		}
 
 
-		let texTemp = this._createTexture(gl, '720p-testpattern.png');
+		//let texTemp = this._createTexture(gl, '720p-testpattern.png');
 
 
 		let stats = new Stats();
@@ -146,7 +147,7 @@ class GLRenderer {
 
 			// Fixed texture: 59 FPS
 			// Just streaming stuff from webcam without processing: Chrome 30 FPS, FF 30 FPS
-			this._drawScene(gl, programInfos, buffers, framebuffers, fbTextures, texWebcam, texTemp);
+			this._drawScene(gl, programInfos, buffers, framebuffers, fbTextures, texWebcam); //, texTemp);
 
 			// Request animation frame in _updateTexture, since we should wait for the texture to have gotten uploaded
 			// successfully before requesting the next frame (especially in Chrome, where upload takes forever)

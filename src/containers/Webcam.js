@@ -73,12 +73,17 @@ class Webcam extends React.Component {
 		// Get webcam stream
 		const constraints = {
 			audio: true,
-			// TODO: Since getCapabilities() still isn't supported, do the trial & error workaround for
-			// finding max. resolution...
-			video: { width: {exact: 1280}, height: {exact: 720} }
+			// TODO: Possible problem on Chrome (desktop): Unlike Firefox, user doesn't get prompted to choose which camera to use
+			video: {
+				width: {ideal: 4096},
+				height: {ideal: 4096},
+				frameRate: {ideal: 60}
+			}
 		};
 
 		const handleSuccess = (stream) => {
+			this.stream = stream;
+
 			const videoTracks = stream.getVideoTracks();
 			const videoSettings = videoTracks[0].getSettings();
 			console.log('Using video device:', videoTracks[0].label);
@@ -87,7 +92,7 @@ class Webcam extends React.Component {
 			console.log('Setting canvas size based on video stream');
 			this.refCanvas.current.width = videoSettings.width;
 			this.refCanvas.current.height = videoSettings.height;
-			this.handleResize(); // trigger once to calculate current scale
+			this.handleResize(); // trigger manually once to calculate current scale
 
 			this.props.dispatch(
 				addDebugInfo(`${videoSettings.width}x${videoSettings.height}@${videoSettings.frameRate}fps`)
@@ -105,7 +110,7 @@ class Webcam extends React.Component {
 
 			if(error.name === 'ConstraintNotSatisfiedError') {
 				console.error('The resolution ' + constraints.video.width.exact + 'x' +
-					constraints.video.width.exact + ' px is not supported by your device.');
+					constraints.video.height.exact + ' px is not supported by your device.');
 			} else if(error.name === 'PermissionDeniedError') {
 				console.error('Permissions have not been granted to use your camera and ' +
 					'microphone, you need to allow the page access to your devices in ' +
@@ -117,7 +122,6 @@ class Webcam extends React.Component {
 		navigator.mediaDevices.getUserMedia(constraints)
 		.then(handleSuccess)
 		.catch(handleError);
-
 
 		// Resize canvas to fill parent but keep aspect ratio
 		window.addEventListener('resize', () => {requestAnimationFrame(this.handleResize)});
@@ -133,12 +137,13 @@ class Webcam extends React.Component {
 	// Resizes canvas while keeping aspect ratio
 	handleResize = () => {
 		let cnv = this.refCanvas.current;
-		if(cnv) {
+		let videoSettings = this.stream && this.stream.getVideoTracks()[0].getSettings();
+		if(cnv && videoSettings) {
 			// TODO: Would be nice to use cnv.parentNode as base for scale calculation instead of
 			// window but offsetWidth/-Height didn't work (reported dimensions a bit too small).
 			let scale = Math.min(
-				window.innerWidth / 1280, // TODO: replace fixed values with video resolution
-				window.innerHeight / 720
+				window.innerWidth / videoSettings.width, // TODO: replace fixed values with video resolution
+				window.innerHeight / videoSettings.height
 			);
 
 			cnv.style.transform = `translate(-50%, -50%) scale(${scale})`;
