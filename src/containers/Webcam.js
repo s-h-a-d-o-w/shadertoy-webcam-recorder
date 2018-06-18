@@ -4,7 +4,7 @@ import GLRenderer from '../utils/GLRenderer.js';
 import * as Recorder from '../utils/Recorder.js';
 
 import {connect} from 'react-redux';
-import {addDebugInfo, ffmpegLoaded} from '../actions';
+import {addDebugInfo, ffmpegLoaded, ffmpegLoadingFailed} from '../actions';
 
 const StyledWebcam = styled.div`
 	position: absolute;
@@ -47,6 +47,7 @@ class Webcam extends React.Component {
 				fps: this.video.srcObject.getVideoTracks()[0].getSettings().frameRate,
 				audio: this.audio,
 				onffmpegloaded: () => this.props.dispatch(ffmpegLoaded()),
+				onffmpegfailed: () => this.props.dispatch(ffmpegLoadingFailed()),
 			});
 		}, true);
 	};

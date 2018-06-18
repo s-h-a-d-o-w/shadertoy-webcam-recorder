@@ -19,14 +19,30 @@ function init(opts) {
 	audioStream = audioStreamCapture.call(opts.audio);
 
 	// See ffmpeg.js docs
-	ffmpegWorker = new Worker('ffmpeg-worker-webm.js'); // Copying of this script is specified manually in webpack config
-	ffmpegWorker.onmessage = function(e) {
-		const msg = e.data;
-		if(msg.type === "ready") {
-			console.log('ffmpeg loaded!');
-			opts.onffmpegloaded();
-		}
-	};
+	let retries = 0;
+	const loadffmpeg = () => {
+		ffmpegWorker = new Worker('ffmpeg-worker-webm.js'); // Copying of this script is specified manually in webpack config
+		console.log('does it get here?');
+		ffmpegWorker.onmessage = (e) => {
+			const msg = e.data;
+			console.log('message from worker:', msg);
+			if(msg.type === "ready") {
+				console.log('ffmpeg loaded!');
+				opts.onffmpegloaded();
+			}
+		};
+		ffmpegWorker.onerror = () => {
+			retries++;
+			if(retries < 5) {
+				console.error('ffmpeg loading failed - retrying...');
+				loadffmpeg();
+			}
+			else {
+				opts.onffmpegfailed();
+			}
+		};
+	}
+	loadffmpeg();
 }
 
 // The nested try blocks will be simplified when Chrome 47 moves to Stable

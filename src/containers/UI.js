@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import {connect} from 'react-redux';
 
 import RecordButton from '../components/RecordButton';
+import Button from '../components/Button';
 
 const StyledUI = styled.div`
 	position: absolute;
@@ -24,13 +25,23 @@ const StyledUI = styled.div`
 
 const UI = (props) => (
 	<StyledUI {...props}>
-		<RecordButton />
+	{
+		props.ffmpegLoaded === undefined ? (
+			<Button>LOADING</Button>
+		) : (
+			props.ffmpegLoaded ? (
+				<RecordButton />
+			) : (
+				<Button>RECORDING UNAVAILABLE</Button>
+			)
+		)
+	}
 	</StyledUI>
 );
 
 const mapStateToProps = (state) => {
 	return {
-		isRecording: state.get('isRecording')
+		ffmpegLoaded: state.get('ffmpegLoaded'),
 	};
 };
 

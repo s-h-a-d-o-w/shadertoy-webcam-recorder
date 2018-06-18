@@ -1,25 +1,9 @@
 import React from 'react';
-import styled from 'styled-components';
-import {startRecording, stopRecording} from '../actions';
 import {connect} from 'react-redux';
+import styled from 'styled-components';
 
-const ButtonContainer = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background-color: #444;
-
-	/*
-	width: 18vmin;
-	height: 9vmin;
-	*/
-	padding: 2vmin 3vmin;
-
-	font-size: 3vmin;
-	color: white;
-
-	cursor: pointer;
-`;
+import Button from './Button';
+import {startRecording, stopRecording} from '../actions';
 
 const RecordSymbol = styled.div`
 	display: inline-block;
@@ -48,20 +32,14 @@ const StopSymbol = styled.div`
 
 
 const RecordButton = (props) => (
-	props.ffmpegLoaded ? (
-		props.isRecording ? (
-			<ButtonContainer onClick={props.onClickStop}>
-				<StopSymbol />STOP
-			</ButtonContainer>
-		) : (
-			<ButtonContainer onClick={props.onClickRecord}>
-				<RecordSymbol />REC
-			</ButtonContainer>
-		)
+	props.isRecording ? (
+		<Button onClick={props.onClickStop}>
+			<StopSymbol />STOP
+		</Button>
 	) : (
-		<ButtonContainer>
-			NOT READY
-		</ButtonContainer>
+		<Button onClick={props.onClickRecord}>
+			<RecordSymbol />REC
+		</Button>
 	)
 );
 
@@ -69,7 +47,6 @@ const RecordButton = (props) => (
 const mapStateToProps = (state) => {
 	return {
 		isRecording: state.get('isRecording'),
-		ffmpegLoaded: state.get('ffmpegLoaded'),
 	};
 };
 
