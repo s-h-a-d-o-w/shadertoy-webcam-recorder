@@ -42,6 +42,7 @@ const UI = (props) => (
 const mapStateToProps = (state) => {
 	return {
 		ffmpegLoaded: state.get('ffmpegLoaded'),
+		isRecording: state.get('isRecording'), // used in styling
 	};
 };
 
