@@ -30,7 +30,11 @@ const UI = (props) => (
 			<Button>LOADING</Button>
 		) : (
 			props.ffmpegLoaded ? (
-				<RecordButton />
+				props.isProcessing ? (
+					<Button>PROCESSING</Button>
+				) : (
+					<RecordButton />
+				)
 			) : (
 				<Button>RECORDING UNAVAILABLE</Button>
 			)
@@ -42,6 +46,7 @@ const UI = (props) => (
 const mapStateToProps = (state) => {
 	return {
 		ffmpegLoaded: state.get('ffmpegLoaded'),
+		isProcessing: state.get('isProcessing'),
 		isRecording: state.get('isRecording'), // used in styling
 	};
 };

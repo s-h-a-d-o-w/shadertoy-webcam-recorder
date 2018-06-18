@@ -14,10 +14,14 @@ const reducer = (state, action) => {
 			return state.set('ffmpegLoaded', true);
 		case 'FFMPEG_LOADING_FAILED':
 			return state.set('ffmpegLoaded', false);
-		case 'START_RECORD':
+		case 'BEGIN_RECORD':
 			return state.set('isRecording', true);
-		case 'STOP_RECORD':
+		case 'END_RECORD':
 			return state.set('isRecording', false);
+		case 'BEGIN_PROCESSING':
+			return state.set('isProcessing', true);
+		case 'END_PROCESSING':
+			return state.set('isProcessing', false);
 		default:
 			return state;
 	}
