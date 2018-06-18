@@ -22,14 +22,23 @@ const configDev = {
 		new webpack.EvalSourceMapDevToolPlugin({
 			exclude: /ffmpeg/
 		}),
+		new webpack.DefinePlugin({
+			'PRODUCTION': JSON.stringify(false)
+		}),
 	]
 }
 
-const config = webpackMerge(configProd, configDev);
-
+// Remove things from prod config that we don't want in dev
+// -----------------------------------------------------------
 // Don't use react-lite in dev, as react devtools don't work with it
 //Reflect.deleteProperty(config, 'resolve');
 // Don't remove console output in dev
-Reflect.deleteProperty(config, 'optimization');
+Reflect.deleteProperty(configProd, 'optimization');
+
+// Remove PRODUCTION: true flag
+configProd.plugins = configProd.plugins.filter(plugin => !(plugin instanceof webpack.DefinePlugin));
+// -----------------------------------------------------------
+
+const config = webpackMerge(configProd, configDev);
 
 module.exports = config;

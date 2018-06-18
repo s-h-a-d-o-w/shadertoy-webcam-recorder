@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path');
 const UglifyJSWebpackPlugin = require('uglifyjs-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
@@ -50,6 +51,9 @@ const config = {
 			to: path.resolve(__dirname, 'dist/assets'),
 		}*/
 		]),
+		new webpack.DefinePlugin({
+			'PRODUCTION': JSON.stringify(true)
+		}),
 	],
 	output: {
 		filename: '[name].bundle.js',

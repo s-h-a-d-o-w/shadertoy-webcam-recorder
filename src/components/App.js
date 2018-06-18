@@ -27,7 +27,7 @@ const App = () => (
 	<StyledApp>
 		<Webcam/>
 		<UI/>
-		<Debug/>
+		{!PRODUCTION ? <Debug/> : ''}
 	</StyledApp>
 );
 
