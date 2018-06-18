@@ -55,7 +55,7 @@ const RecordButton = (props) => (
 			</ButtonContainer>
 		) : (
 			<ButtonContainer onClick={props.onClickRecord}>
-				<RecordSymbol />REa
+				<RecordSymbol />REC
 			</ButtonContainer>
 		)
 	) : (

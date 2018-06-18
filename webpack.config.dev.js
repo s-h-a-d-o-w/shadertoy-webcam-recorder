@@ -13,9 +13,6 @@ const configDev = {
 			modules: false,
 		}
 	},
-	entry: {
-		app: ['webpack-hot-middleware/client'],
-	},
 	plugins: [
 		new webpack.NamedModulesPlugin(),
 		new webpack.HotModuleReplacementPlugin(),
