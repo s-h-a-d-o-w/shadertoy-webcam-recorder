@@ -24,6 +24,7 @@
     "react-lite": "^0.15.39",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",
+    "redux-thunk": "^2.3.0",
     "stats.js": "^0.17.0",
     "styled-components": "^3.3.2",
     "webpack-dev-server": "^3.1.4"

@@ -22,10 +22,8 @@ function init(opts) {
 	let retries = 0;
 	const loadffmpeg = () => {
 		ffmpegWorker = new Worker('ffmpeg-worker-webm.js'); // Copying of this script is specified manually in webpack config
-		console.log('does it get here?');
 		ffmpegWorker.onmessage = (e) => {
 			const msg = e.data;
-			console.log('message from worker:', msg);
 			if(msg.type === "ready") {
 				console.log('ffmpeg loaded!');
 				opts.onffmpegloaded();
