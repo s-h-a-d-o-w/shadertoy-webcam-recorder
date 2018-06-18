@@ -1,12 +1,16 @@
 export const addDebugInfo = (info) => ({
 	type: 'ADD_DEBUG_INFO',
-	info
+	info,
+});
+
+export const ffmpegLoaded = () => ({
+	type: 'FFMPEG_LOADED',
 });
 
 export const startRecording = () => ({
-	type: 'START_RECORD'
+	type: 'START_RECORD',
 });
 
 export const stopRecording = () => ({
-	type: 'STOP_RECORD'
+	type: 'STOP_RECORD',
 });

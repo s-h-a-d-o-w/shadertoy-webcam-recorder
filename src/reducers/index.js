@@ -11,6 +11,8 @@ const reducer = (state, action) => {
 					Immutable.List()
 				).push(action.info)
 			);
+		case 'FFMPEG_LOADED':
+			return state.set('ffmpegLoaded', true);
 		case 'START_RECORD':
 			Recorder.startRecording();
 			return state.set('isRecording', true);

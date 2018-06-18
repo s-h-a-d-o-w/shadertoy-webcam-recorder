@@ -20,6 +20,9 @@ class GLRenderer {
 	}
 
 	start(gl, video) {
+		// Could add gl context to 'this' but that would mean a LOT
+		// of 'this.gl' instead of simply 'gl' in here...
+
 		// Vertex shader program
 		const vsSource = `
 			attribute vec4 aVertexPosition;

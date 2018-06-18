@@ -42,7 +42,7 @@ const Debug = (props) => (
 			props.debugInfos
 			.toJS()
 			.reduce( // Add <br> elements between infos
-				(acc, el) => acc.concat(el).concat(<br/>),
+				(acc, el, idx) => acc.concat(el).concat(<br key={idx}/>),
 				[]
 			)
 		}

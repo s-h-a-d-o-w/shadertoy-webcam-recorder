@@ -4,7 +4,7 @@ import GLRenderer from '../utils/GLRenderer.js';
 import * as Recorder from '../utils/Recorder.js';
 
 import {connect} from 'react-redux';
-import {addDebugInfo} from '../actions';
+import {addDebugInfo, ffmpegLoaded} from '../actions';
 
 const StyledWebcam = styled.div`
 	position: absolute;
@@ -42,11 +42,12 @@ class Webcam extends React.Component {
 
 			// Capturing stream reduces framerate to ~30 FPS (at least on my machine) and can't be separated
 			// into a different thread
-			Recorder.init(
-				this.refCanvas.current,
-				this.video.srcObject.getVideoTracks()[0].getSettings().frameRate,
-				this.audio
-			);
+			Recorder.init({
+				canvas: this.refCanvas.current,
+				fps: this.video.srcObject.getVideoTracks()[0].getSettings().frameRate,
+				audio: this.audio,
+				onffmpegloaded: () => this.props.dispatch(ffmpegLoaded()),
+			});
 		}, true);
 	};
 

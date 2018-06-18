@@ -11,16 +11,21 @@ let audioStream;
 let audioRecorder;
 let audioBlobs;
 
-function init(canvas, fps, audio) {
-	videoStream = canvas.captureStream(fps);
-	audioStream = audio;
+function init(opts) {
+	// Could of course call captureStream() only directly before recording.
+	// Problem: frame rate would suddenly drop during recording. BAD UX!
+	videoStream = opts.canvas.captureStream(opts.fps);
+	let audioStreamCapture = opts.audio.captureStream || opts.audio.mozCaptureStream;
+	audioStream = audioStreamCapture.call(opts.audio);
 
 	// See ffmpeg.js docs
 	ffmpegWorker = new Worker('ffmpeg-worker-webm.js'); // Copying of this script is specified manually in webpack config
 	ffmpegWorker.onmessage = function(e) {
-		var msg = e.data;
-		if(msg.type === "ready")
+		const msg = e.data;
+		if(msg.type === "ready") {
 			console.log('ffmpeg loaded!');
+			opts.onffmpegloaded();
+		}
 	};
 }
 
@@ -45,8 +50,7 @@ function startRecording() {
 	};
 
 	// Create audio recorder
-	let captureStream = audioStream.captureStream || audioStream.mozCaptureStream;
-	audioRecorder = new MediaRecorder(captureStream.call(audioStream), {
+	audioRecorder = new MediaRecorder(audioStream, {
 		audioBitsPerSecond: 200 * 1000, // Firefox seems to respect this
 	});
 	audioRecorder.ondataavailable = (event) => {

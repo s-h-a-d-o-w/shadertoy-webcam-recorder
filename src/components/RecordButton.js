@@ -9,8 +9,11 @@ const ButtonContainer = styled.div`
 	align-items: center;
 	background-color: #444;
 
+	/*
 	width: 18vmin;
 	height: 9vmin;
+	*/
+	padding: 2vmin 3vmin;
 
 	font-size: 3vmin;
 	color: white;
@@ -45,13 +48,19 @@ const StopSymbol = styled.div`
 
 
 const RecordButton = (props) => (
-	props.isRecording ? (
-		<ButtonContainer onClick={props.onClickStop}>
-			<StopSymbol />STOP
-		</ButtonContainer>
+	props.ffmpegLoaded ? (
+		props.isRecording ? (
+			<ButtonContainer onClick={props.onClickStop}>
+				<StopSymbol />STOP
+			</ButtonContainer>
+		) : (
+			<ButtonContainer onClick={props.onClickRecord}>
+				<RecordSymbol />REa
+			</ButtonContainer>
+		)
 	) : (
-		<ButtonContainer onClick={props.onClickRecord}>
-			<RecordSymbol />REC
+		<ButtonContainer>
+			NOT READY
 		</ButtonContainer>
 	)
 );
@@ -59,7 +68,8 @@ const RecordButton = (props) => (
 
 const mapStateToProps = (state) => {
 	return {
-		isRecording: state.get('isRecording')
+		isRecording: state.get('isRecording'),
+		ffmpegLoaded: state.get('ffmpegLoaded'),
 	};
 };
 
