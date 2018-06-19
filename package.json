@@ -15,6 +15,7 @@
     "start:analyzer": "cross-env BUNDLE_ANALYZER=true webpack"
   },
   "dependencies": {
+    "compression": "^1.7.2",
     "express": "^4.16.3",
     "ffmpeg.js": "^3.1.9001",
     "gl-mat4": "^1.2.0",

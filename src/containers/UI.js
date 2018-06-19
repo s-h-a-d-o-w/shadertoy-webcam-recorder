@@ -17,7 +17,7 @@ const StyledUI = styled.div`
 
 	box-sizing: border-box;
 	padding: 5vh;
-	border: ${props => props.isRecording ? 0.5 : 0}vh solid red; // Only during recording!
+	border: ${props => props.isRecording ? 0.5 : 0}vh solid red;
 
 	font-family: DSEG14-Classic, sans-serif;
 	color: white;
