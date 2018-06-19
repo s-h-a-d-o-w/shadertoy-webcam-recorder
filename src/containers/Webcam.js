@@ -4,7 +4,7 @@ import GLRenderer from '../utils/GLRenderer.js';
 import * as Recorder from '../utils/Recorder.js';
 
 import {connect} from 'react-redux';
-import {addDebugInfo, ffmpegLoaded, ffmpegLoadingFailed} from '../actions';
+import {addDebugInfo, ffmpegLoaded, hideLightbox, webcamAccess} from '../actions';
 
 const StyledWebcam = styled.div`
 	position: absolute;
@@ -46,8 +46,8 @@ class Webcam extends React.Component {
 				canvas: this.refCanvas.current,
 				fps: this.video.srcObject.getVideoTracks()[0].getSettings().frameRate,
 				audio: this.audio,
-				onffmpegloaded: () => this.props.dispatch(ffmpegLoaded()),
-				onffmpegfailed: () => this.props.dispatch(ffmpegLoadingFailed()),
+				onffmpegloaded: () => this.props.dispatch(ffmpegLoaded(true)),
+				onffmpegfailed: () => this.props.dispatch(ffmpegLoaded(false)),
 			});
 		}, true);
 	};
@@ -96,6 +96,8 @@ class Webcam extends React.Component {
 			this.refCanvas.current.height = videoSettings.height;
 			this.handleResize(); // trigger manually once to calculate current scale
 
+			this.props.dispatch(hideLightbox());
+			this.props.dispatch(webcamAccess(true));
 			this.props.dispatch(
 				addDebugInfo(`${videoSettings.width}x${videoSettings.height}@${videoSettings.frameRate}fps`)
 			);
@@ -138,12 +140,12 @@ class Webcam extends React.Component {
 
 	// Resizes canvas while keeping aspect ratio
 	handleResize = () => {
-		let cnv = this.refCanvas.current;
-		let videoSettings = this.stream && this.stream.getVideoTracks()[0].getSettings();
+		const cnv = this.refCanvas.current;
+		const videoSettings = this.stream && this.stream.getVideoTracks()[0].getSettings();
 		if(cnv && videoSettings) {
 			// TODO: Would be nice to use cnv.parentNode as base for scale calculation instead of
 			// window but offsetWidth/-Height didn't work (reported dimensions a bit too small).
-			let scale = Math.min(
+			const scale = Math.min(
 				window.innerWidth / videoSettings.width, // TODO: replace fixed values with video resolution
 				window.innerHeight / videoSettings.height
 			);

@@ -1,5 +1,8 @@
 dist
 
+# Self-signed certificate for local testing
+/*.pfx
+
 # Logs
 logs
 *.log

@@ -5,35 +5,44 @@ export const addDebugInfo = (info) => ({
 	info,
 });
 
-export const ffmpegLoaded = () => ({
+export const ffmpegLoaded = (value) => ({
 	type: 'FFMPEG_LOADED',
+	value,
 });
 
-export const ffmpegLoadingFailed = () => ({
-	type: 'FFMPEG_LOADING_FAILED',
+export const hideLightbox = () => ({
+	type: 'HIDE_LIGHTBOX',
+});
+
+export const showLightbox = (content) => ({
+	type: 'SHOW_LIGHTBOX',
+	content,
 });
 
 export const startRecording = () => {
 	Recorder.startRecording();
 
 	return {
-		type: 'BEGIN_RECORD',
+		type: 'IS_RECORDING',
+		value: true
 	}
 };
 
 export const stopRecording = () => {
 	return (dispatch) => {
 		dispatch({
-			type: 'END_RECORD',
+			type: 'IS_RECORDING',
+			value: false,
 		});
 		dispatch({
-			type: 'BEGIN_PROCESSING',
+			type: 'IS_PROCESSING',
+			value: true,
 		});
 
 		Recorder.stopRecording()
 		.then(Recorder.getObjectURL)
 		.then((url) => {
-			var a = document.createElement('a');
+			let a = document.createElement('a');
 			a.style.display = 'none';
 			a.href = url;
 			a.download = 'output.webm';
@@ -42,13 +51,20 @@ export const stopRecording = () => {
 			setTimeout(function() {
 				document.body.removeChild(a);
 				window.URL.revokeObjectURL(url);
+				a = null;
 			}, 100);
 
 			// It takes a bit for the browser to pop up download prompt
 			setTimeout(() => dispatch({
-					type: 'END_PROCESSING',
+					type: 'IS_PROCESSING',
+					value: false,
 			}), 500);
 		})
 		.catch(e => console.error(e)); // TODO: Provide feedback to user
 	}
 };
+
+export const webcamAccess = (value) => ({
+	type: 'WEBCAM_ACCESS',
+	value,
+});

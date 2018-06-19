@@ -15,7 +15,7 @@ function init(opts) {
 	// Could of course call captureStream() only directly before recording.
 	// Problem: frame rate would suddenly drop during recording. BAD UX!
 	videoStream = opts.canvas.captureStream(opts.fps);
-	let audioStreamCapture = opts.audio.captureStream || opts.audio.mozCaptureStream;
+	const audioStreamCapture = opts.audio.captureStream || opts.audio.mozCaptureStream;
 	audioStream = audioStreamCapture.call(opts.audio);
 
 	// See ffmpeg.js docs
@@ -82,7 +82,7 @@ function startRecording() {
 
 function stopRecording() {
 	return new Promise((resolve, reject) => {
-		let isDone = {
+		const isDone = {
 			audio: false,
 			video: false,
 		};
@@ -107,18 +107,18 @@ function stopRecording() {
 function getObjectURL() {
 	return new Promise((resolve, reject) => {
 		let videoBuffer;
-		let fileReader = new FileReader();
+		const fileReader = new FileReader();
 		fileReader.onload = function() {
 			videoBuffer = this.result;
 
 			let audioBuffer;
-			let fileReaderInner = new FileReader();
+			const fileReaderInner = new FileReader();
 			fileReaderInner.onload = function() {
 				audioBuffer = this.result;
 
 				// Resolve once worker is done merging video and audio
 				ffmpegWorker.onmessage = function(e) {
-					var msg = e.data;
+					const msg = e.data;
 					if(msg.type === "stderr") {
 						console.log('ffmpeg: ' + msg.data);
 					}

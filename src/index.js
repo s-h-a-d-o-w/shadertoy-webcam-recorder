@@ -7,11 +7,12 @@ import thunk from 'redux-thunk';
 
 import App from './components/App.js';
 import rootReducer from './reducers'
+import initialState from './store/initialState';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(
 	rootReducer,
-	Immutable.Map(),
+	Immutable.fromJS(initialState),
 	composeEnhancers(applyMiddleware(thunk))
 );
 

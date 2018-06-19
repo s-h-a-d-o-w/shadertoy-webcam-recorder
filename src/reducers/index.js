@@ -11,17 +11,17 @@ const reducer = (state, action) => {
 				).push(action.info)
 			);
 		case 'FFMPEG_LOADED':
-			return state.set('ffmpegLoaded', true);
-		case 'FFMPEG_LOADING_FAILED':
-			return state.set('ffmpegLoaded', false);
-		case 'BEGIN_RECORD':
-			return state.set('isRecording', true);
-		case 'END_RECORD':
-			return state.set('isRecording', false);
-		case 'BEGIN_PROCESSING':
-			return state.set('isProcessing', true);
-		case 'END_PROCESSING':
-			return state.set('isProcessing', false);
+			return state.set('ffmpegLoaded', action.value);
+		case 'IS_RECORDING':
+			return state.set('isRecording', action.value);
+		case 'IS_PROCESSING':
+			return state.set('isProcessing', action.value);
+		case 'SHOW_LIGHTBOX':
+			return state.set('lightboxContent', action.content);
+		case 'HIDE_LIGHTBOX':
+			return state.delete('lightboxContent');
+		case 'WEBCAM_ACCESS':
+			return state.set('webcamAccess', action.value);
 		default:
 			return state;
 	}
