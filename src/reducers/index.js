@@ -16,6 +16,8 @@ const reducer = (state, action) => {
 			return state.set('isRecording', action.value);
 		case 'IS_PROCESSING':
 			return state.set('isProcessing', action.value);
+		case 'PROGRESS':
+			return state.set('progress', action.value);
 		case 'SHOW_LIGHTBOX':
 			return state.set('lightboxContent', action.content);
 		case 'HIDE_LIGHTBOX':

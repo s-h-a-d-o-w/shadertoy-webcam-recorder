@@ -10,6 +10,11 @@ export const ffmpegLoaded = (value) => ({
 	value,
 });
 
+export const progress = (value) => ({
+	type: 'PROGRESS',
+	value
+});
+
 export const hideLightbox = () => ({
 	type: 'HIDE_LIGHTBOX',
 });
@@ -40,7 +45,7 @@ export const stopRecording = () => {
 		});
 
 		Recorder.stopRecording()
-		.then(Recorder.getObjectURL)
+		.then(() => Recorder.getObjectURL(dispatch))
 		.then((url) => {
 			let a = document.createElement('a');
 			a.style.display = 'none';

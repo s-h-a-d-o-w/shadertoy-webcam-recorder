@@ -31,7 +31,8 @@ const UI = (props) => (
 		) : (
 			props.ffmpegLoaded ? (
 				props.isProcessing ? (
-					<Button>PROCESSING</Button>
+					//<Button>PROCESSING</Button>
+					<Button>{props.progress}</Button>
 				) : (
 					<RecordButton />
 				)
@@ -48,6 +49,7 @@ const mapStateToProps = (state) => {
 		ffmpegLoaded: state.get('ffmpegLoaded'),
 		isProcessing: state.get('isProcessing'),
 		isRecording: state.get('isRecording'), // used in styling
+		progress: state.get('progress'),
 	};
 };
 

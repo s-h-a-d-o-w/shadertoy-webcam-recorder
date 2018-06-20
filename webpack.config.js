@@ -46,6 +46,9 @@ const config = {
 		}, {
 			from: path.resolve(__dirname, 'node_modules/ffmpeg.js/ffmpeg-worker-webm.js'),
 			to: path.resolve(__dirname, 'dist/ffmpeg-worker-webm.js'),
+		}, {
+			from: path.resolve(__dirname, 'src/utils/merge.js'),
+			to: path.resolve(__dirname, 'dist/merge.js'),
 		}/*, {
 			from: path.resolve(__dirname, 'assets'),
 			to: path.resolve(__dirname, 'dist/assets'),
