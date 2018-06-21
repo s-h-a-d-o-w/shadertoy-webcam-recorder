@@ -60,10 +60,13 @@ export const stopRecording = () => {
 			}, 100);
 
 			// It takes a bit for the browser to pop up download prompt
-			setTimeout(() => dispatch({
+			setTimeout(() => {
+				dispatch({
 					type: 'IS_PROCESSING',
 					value: false,
-			}), 500);
+				})
+				dispatch(progress(0));
+			}, 500);
 		})
 		.catch(e => console.error(e)); // TODO: Provide feedback to user
 	}

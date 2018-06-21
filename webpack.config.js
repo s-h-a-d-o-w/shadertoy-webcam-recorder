@@ -43,12 +43,12 @@ const config = {
 		new CopyWebpackPlugin([{
 			from: path.resolve(__dirname, 'src/index.html'),
 			to: path.resolve(__dirname, 'dist/index.html'),
-		}, {
+		}, { // TODO: Use worker-loader: https://github.com/webpack-contrib/worker-loader
 			from: path.resolve(__dirname, 'node_modules/ffmpeg.js/ffmpeg-worker-webm.js'),
 			to: path.resolve(__dirname, 'dist/ffmpeg-worker-webm.js'),
 		}, {
-			from: path.resolve(__dirname, 'src/utils/merge.js'),
-			to: path.resolve(__dirname, 'dist/merge.js'),
+			from: path.resolve(__dirname, 'src/utils/mergeBlobsWorker.js'),
+			to: path.resolve(__dirname, 'dist/mergeBlobsWorker.js'),
 		}/*, {
 			from: path.resolve(__dirname, 'assets'),
 			to: path.resolve(__dirname, 'dist/assets'),

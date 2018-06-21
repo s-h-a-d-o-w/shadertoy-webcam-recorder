@@ -3,6 +3,7 @@
 import {progress} from '../actions';
 
 let ffmpegWorker;
+let mergeWorker;
 
 let videoStream;
 let videoRecorder;
@@ -17,10 +18,13 @@ let recDuration;
 
 function init(opts) {
 	// Could of course call captureStream() only directly before recording.
-	// Problem: frame rate would suddenly drop during recording. BAD UX!
+	// Problem: frame rate would suddenly drop during recording => BAD UX!
 	videoStream = opts.canvas.captureStream(opts.fps);
 	const audioStreamCapture = opts.audio.captureStream || opts.audio.mozCaptureStream;
 	audioStream = audioStreamCapture.call(opts.audio);
+
+	// TODO: Use worker-loader instead: https://github.com/webpack-contrib/worker-loader
+	mergeWorker = new Worker('mergeBlobsWorker.js');
 
 	// See ffmpeg.js docs
 	let retries = 0;
@@ -88,6 +92,7 @@ function startRecording() {
 }
 
 function stopRecording() {
+	console.log('Recorder.stopRecording()');
 	return new Promise((resolve, reject) => {
 		const isDone = {
 			audio: false,
@@ -115,38 +120,45 @@ function stopRecording() {
 function getObjectURL(dispatch) {
 	console.log('getObjectURL()');
 	return new Promise((resolve, reject) => {
-		blobsToArrayBuffers(videoBlobs, dispatch).then((buffers) => {
-			let videoBuffer = arrayBufferConcat(...buffers);
-			console.log('videoBuffer done.');
-
-			let audioBuffer;
-			const fileReaderInner = new FileReader();
-			fileReaderInner.onload = function() {
-				console.log('audioBuffer done.');
-				audioBuffer = this.result;
-
+		mergeWorker.onmessage = (msg) => {
+			if(msg.data.hasOwnProperty('progress') && msg.data.type === 'video') {
+				// Progress for this should only take up 0-50%, rest will be ffmpeg
+				// Don't use progress of audio, since it's negligible (200 kbit stream vs. 5-15 mbit...)
+				dispatch(progress(Math.round(msg.data.progress * 0.5 * 100)));
+			}
+			else if(msg.data instanceof Array) {
 				// Resolve once worker is done merging video and audio
-				ffmpegWorker.onmessage = function(e) {
-					const msg = e.data;
-					if(msg.type === "stderr") {
-						// ffmpeg is pretty fast anyway, probably no need to show its progress
+				ffmpegWorker.onmessage = (e) => {
+					const ffmpegMsg = e.data;
+					if(ffmpegMsg.type === "stderr") {
+						console.log('ffmpeg: ' + ffmpegMsg.data);
 
 						// ffmpeg reports progress containing time stamps.
 						// e.g.: time=00:00:04.33
-						// if(msg.data.indexOf('time=') > 0) {
-						// 	const ffmpegTime = msg.data.match(/time=(.*?) /)[1];
-						// 	let progress = Date.parse(`1970-01-01T${ffmpegTime}0Z`)) / recDuration;
-						// 	if(progress > 1)
-						// 		progress = 1;
+						if(ffmpegMsg.data.indexOf('time=') >= 0) {
+							const ffmpegTime = ffmpegMsg.data.match(/time=(.*?) /)[1];
 
-						// 	// dispatch progress
-						// 	console.log('progress:', progress);
-						// }
+							let muxProgress = Date.parse(`1970-01-01T${ffmpegTime}0Z`) / recDuration;
+							if(muxProgress > 1)
+							muxProgress = 1;
 
-						console.log('ffmpeg: ' + msg.data);
+							// ffmpeg muxing uses progress range 60-100%
+							dispatch(progress(Math.round((muxProgress * 0.4 + 0.6) * 100)));
+						}
+						else if(ffmpegMsg.data.indexOf('ffmpeg version') >= 0) {
+							// ffmpeg started
+							dispatch(progress(53));
+						}
+						else if(ffmpegMsg.data.indexOf('Input #0') >= 0) {
+							dispatch(progress(56));
+						}
+						else if(ffmpegMsg.data.indexOf('Output #0') >= 0) {
+							// close to starting to mux the data
+							dispatch(progress(60));
+						}
 					}
-					else if(msg.type === "done") {
-						resolve(window.URL.createObjectURL(new Blob([msg.data.MEMFS[0].data.buffer])));
+					else if(ffmpegMsg.type === "done") {
+						resolve(window.URL.createObjectURL(new Blob([ffmpegMsg.data.MEMFS[0].data.buffer])));
 					}
 				};
 
@@ -155,10 +167,7 @@ function getObjectURL(dispatch) {
 				console.log('before sending to ffmpeg.');
 				ffmpegWorker.postMessage({
 					type: "run",
-					MEMFS: [
-						{name: "video.webm", data: new Uint8Array(videoBuffer)},
-						{name: "audio.webm", data: new Uint8Array(audioBuffer)},
-					],
+					MEMFS: msg.data,
 					arguments: [
 						'-i', 'video.webm',
 						'-i', 'audio.webm',
@@ -168,67 +177,14 @@ function getObjectURL(dispatch) {
 					]
 				});
 				console.log('after sending to ffmpeg.');
-			};
-			fileReaderInner.readAsArrayBuffer(new Blob(audioBlobs));
-		})
-
-	});
-}
-
-function blobsToArrayBuffers(blobs, dispatch) {
-	let index = 0;
-	let buffers = [];
-
-	dispatch(progress(0));
-
-	return new Promise((resolve, reject) => {
-		function nextBlobToBuffer() {
-			if(index < blobs.length) {
-				blobToArrayBuffer(blobs[index++]).then((e) => {
-					buffers.push(e.target.result);
-					let blub = Math.round((index / blobs.length) * 100);
-					console.log(`blub ${blub} / index ${index} / length ${blobs.length}`);
-					dispatch(progress(blub));
-					nextBlobToBuffer();
-				});
 			}
-			else
-				resolve(buffers);
-		}
-		nextBlobToBuffer();
+		};
+
+		mergeWorker.postMessage({
+			video: videoBlobs,
+			audio: audioBlobs,
+		});
 	});
-}
-
-function blobToArrayBuffer(blob) {
-	var fileReader = new FileReader();
-
-	return new Promise(function(resolve, reject) {
-		fileReader.onload = resolve;
-		fileReader.onerror = reject;
-
-		fileReader.readAsArrayBuffer(blob);
-	});
-};
-
-function arrayBufferConcat () {
-	var length = 0;
-	var buffer = null;
-
-	for (var i in arguments) {
-		buffer = arguments[i];
-		length += buffer.byteLength;
-	}
-
-	var joined = new Uint8Array(length);
-	var offset = 0;
-
-	for (var i in arguments) {
-		buffer = arguments[i];
-		joined.set(new Uint8Array(buffer), offset);
-		offset += buffer.byteLength;
-	}
-
-	return joined.buffer;
 }
 
 export {init, startRecording, stopRecording, getObjectURL};

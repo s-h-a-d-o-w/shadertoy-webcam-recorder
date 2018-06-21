@@ -1,5 +1,16 @@
 ## TODO
 
+- Will probably have to convert this into an Electron app. Keeping more than 5 Minutes of HD footage in RAM doesn't make browsers happy (MB 
+are webm video file sizes, not RAM use):
+
+#### Chrome  
+Works: 4 minutes, 82 MB  
+Tab crash @ 100 MB / 4m8s of processed video
+
+#### Firefox
+Works: 3:30 minutes, 140 MB  
+ffmpeg reports "out of memory" @ 278 MB / 6m34s of video
+
 - Actually make shaders from shadertoy available...
 
 - Check whether pathetic frame rates mostly stem from capturing streams. I can't do anything about that but at least then I know that IF maybe 

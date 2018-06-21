@@ -32,7 +32,12 @@ const UI = (props) => (
 			props.ffmpegLoaded ? (
 				props.isProcessing ? (
 					//<Button>PROCESSING</Button>
-					<Button>{props.progress}</Button>
+					<Button style={{flexDirection: 'column'}}>
+						<div>PROCESSING</div>
+						<div style={{fontSize: '2vmin', paddingTop: '0.5vmin'}}>
+							{props.progress ? props.progress : 0}%
+						</div>
+					</Button>
 				) : (
 					<RecordButton />
 				)
