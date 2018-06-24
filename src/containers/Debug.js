@@ -25,6 +25,7 @@ const StyledDebug = styled.div`
 	box-sizing: border-box;
 	padding: 2vh;
 
+	/* May not be pretty but it's functional (outlines work well) */
 	font-family: sans-serif;
 	font-size: 2.5vmin;
 	font-weight: bold;

@@ -1,7 +1,9 @@
 /**
- * Expected: {video: [Blob], audio: [Blob]}
+ * This worker will post:
+ * - Progress messages in the format of: {type: 'video'|'audio', progress: 0.0-1.0}
+ * - When done, an array of streams suitable for ffmpeg's MEMFS input.
  *
- * Posts progress messages in the format of: {type: 'video'|'audio', progress: 0.0-1.0}
+ * @param msg {video: [Blob], audio: [Blob]}
  */
 onmessage = (msg) => {
 	blobsToArrayBuffers({
