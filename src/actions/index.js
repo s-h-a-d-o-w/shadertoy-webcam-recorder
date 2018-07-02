@@ -12,7 +12,7 @@ export const ffmpegLoaded = (value) => ({
 
 export const progress = (value) => ({
 	type: 'PROGRESS',
-	value
+	value,
 });
 
 export const hideLightbox = () => ({
@@ -29,7 +29,7 @@ export const startRecording = () => {
 
 	return {
 		type: 'IS_RECORDING',
-		value: true
+		value: true,
 	}
 };
 
@@ -64,7 +64,7 @@ export const stopRecording = () => {
 				dispatch({
 					type: 'IS_PROCESSING',
 					value: false,
-				})
+				});
 				dispatch(progress(0));
 			}, 500);
 		})

@@ -101,10 +101,10 @@ function stopRecording() {
 
 		videoRecorder.onstop = () => {
 			isDone.audio ? resolve() : isDone.video = true;
-		}
+		};
 		audioRecorder.onstop = () => {
 			isDone.video ? resolve() : isDone.audio = true;
-		}
+		};
 
 		recDuration = (new Date) - recStart;
 		videoRecorder.stop();

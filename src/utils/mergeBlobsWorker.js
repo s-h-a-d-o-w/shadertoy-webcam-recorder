@@ -10,14 +10,14 @@ onmessage = (msg) => {
 		type: 'video',
 		blobs: msg.data.video,
 	}).then((videoBuffers) => {
-		let videoBuffer = arrayBufferConcat(...videoBuffers);
+		let videoBuffer = arrayBufferConcat(videoBuffers);
 		//console.log('videoBuffer done.');
 
 		blobsToArrayBuffers({
 			type: 'audio',
 			blobs: msg.data.audio,
 		}).then((audioBuffers) => {
-			let audioBuffer = arrayBufferConcat(...audioBuffers);
+			let audioBuffer = arrayBufferConcat(audioBuffers);
 
 			postMessage([
 				{name: "video.webm", data: new Uint8Array(videoBuffer)},
@@ -66,20 +66,20 @@ function blobToArrayBuffer(blob) {
 	});
 };
 
-function arrayBufferConcat () {
-	let length = 0;
-	let buffer = null;
+function arrayBufferConcat(buffers) {
+	// Create one array than can contain all buffers
+	const joined = new Uint8Array(
+		buffers.reduce(
+			(acc, buffer) => (acc + buffer.byteLength),
+			0
+		)
+	);
 
-	for(let i in arguments) {
-		buffer = arguments[i];
-		length += buffer.byteLength;
-	}
-
-	const joined = new Uint8Array(length);
+	// Copy all buffers to our single array
 	let offset = 0;
-
-	for(let i in arguments) {
-		buffer = arguments[i];
+	let buffer;
+	for(let i in buffers) {
+		buffer = buffers[i];
 		joined.set(new Uint8Array(buffer), offset);
 		offset += buffer.byteLength;
 	}

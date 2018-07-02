@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Center = styled.div`
+const CenterAligned = styled.div`
 	height: 100%;
 
 	display: flex;
@@ -28,10 +28,10 @@ const Text = styled.div`
 `;
 
 const Lightbox = (props) => (
-	<Center>
+	<CenterAligned>
 		<Blackout/>
 		<Text>{props.children}</Text>
-	</Center>
+	</CenterAligned>
 )
 
 export default Lightbox;

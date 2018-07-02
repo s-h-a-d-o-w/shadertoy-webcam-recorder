@@ -1,6 +1,12 @@
 Webcam recording app that is supposed to enable users to choose from the library of webcam 
 shaders on shadertoy.com (at some point).
 
+## Development notes
+
+Note that running `start:dev` requires a cert.pfx (a certificate without password) in the root 
+directory. (See e.g. [here](https://github.com/webpack/webpack-dev-server/pull/1425/files) for how to 
+create them) 
+
 ## Notes on architecture
 
 - Web workers enable processing of the recording in separate threads
@@ -9,7 +15,7 @@ shaders on shadertoy.com (at some point).
 ## Notes on browsers
 
 - Chrome has a [Texture upload bug](https://bugs.chromium.org/p/chromium/issues/detail?id=92388) that 
-makes the app very slow 
+makes the app very slow on machines that use IGPs.
 
 ## TODO
 

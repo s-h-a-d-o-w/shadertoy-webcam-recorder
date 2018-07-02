@@ -81,6 +81,13 @@ class Webcam extends React.Component {
 				height: {ideal: 1080},
 				frameRate: {ideal: 30}, // 60 fps might be possible on some devices but... see 4K above.
 			}
+			/*
+			video: {
+				width: {ideal: 640}, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
+				height: {ideal: 480},
+				frameRate: {ideal: 30}, // 60 fps might be possible on some devices but... see 4K above.
+			}
+			*/
 		};
 
 		const handleSuccess = (stream) => {
