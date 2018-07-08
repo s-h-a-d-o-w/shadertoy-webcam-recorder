@@ -21,57 +21,35 @@ const StyledCanvas = styled.canvas`
 `;
 
 class Webcam extends React.Component {
-	constructor(props) {
-		super(props);
-		this.refCanvas = React.createRef();
-	}
+	refCanvas = React.createRef();
+	refVideo = React.createRef();
+	refAudio = React.createRef();
+	state = {startedRenderer: false};
 
 	// Kicks off canvas rendering once stream starts to play
-	addVideoPlayingListener = () => {
-		let done = false;
-		this.video.addEventListener('playing', () => {
-			// Listener is trigger twice in quick succession - too quick
-			// for removeEventListener to finish in time.
-			// But this should only be executed once.
-			if(done) return;
-			done = true;
+	videoPlaying = () => {
+		// Listener is trigger twice in quick succession - too quick
+		// for removeEventListener to finish in time.
+		// But this should only be executed once.
+		if(this.state.startedRenderer) return;
+		this.setState({startedRenderer: true});
 
-			console.log('Starting WebGL rendering');
-			this.renderer = new GLRenderer();
-			this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
+		console.log('Starting WebGL rendering');
+		this.renderer = new GLRenderer();
+		this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.refVideo.current);
 
-			// Capturing stream reduces framerate to ~30 FPS (at least on my machine) and can't be separated
-			// into a different thread
-			Recorder.init({
-				canvas: this.refCanvas.current,
-				fps: this.video.srcObject.getVideoTracks()[0].getSettings().frameRate,
-				audio: this.audio,
-				onffmpegloaded: () => this.props.dispatch(ffmpegLoaded(true)),
-				onffmpegfailed: () => this.props.dispatch(ffmpegLoaded(false)),
-			});
-		}, true);
+		// Capturing stream reduces framerate to ~30 FPS (at least on my machine) and can't be separated
+		// into a different thread
+		Recorder.init({
+			canvas: this.refCanvas.current,
+			fps: this.refVideo.current.srcObject.getVideoTracks()[0].getSettings().frameRate,
+			audio: this.refAudio.current,
+			onffmpegloaded: () => this.props.dispatch(ffmpegLoaded(true)),
+			onffmpegfailed: () => this.props.dispatch(ffmpegLoaded(false)),
+		});
 	};
 
 	componentDidMount = () => {
-		// Prepare video tag and its event listeners that will receive webcam stream
-		this.video = document.createElement('video');
-		this.video.autoplay = true;
-		this.addVideoPlayingListener();
-		// Chrome requires video to be added to DOM and to be visible, otherwise video stream won't start
-		// Doesn't seem to impact performance, probably since it's behind the fullscreen UI anyway...
-		document.body.appendChild(this.video);
-
-		this.audio = document.createElement('audio');
-		this.audio.autoplay = true;
-		this.audio.style.display = 'none';
-
-
-		// TODO: Remove this on release? It's just annoying to hear stuff while developing...
-		// Recording is not affected.
-		this.video.muted = 'muted';
-		this.audio.muted = 'muted';
-
-
 		// Get webcam stream
 		const constraints = {
 			audio: true,
@@ -90,7 +68,7 @@ class Webcam extends React.Component {
 			*/
 		};
 
-		const handleSuccess = (stream) => {
+		const getUserMediaSuccess = (stream) => {
 			this.stream = stream;
 
 			const videoTracks = stream.getVideoTracks();
@@ -109,14 +87,14 @@ class Webcam extends React.Component {
 				addDebugInfo(`${videoSettings.width}x${videoSettings.height}@${videoSettings.frameRate}fps`)
 			);
 
-			this.video.srcObject = stream;
+			this.refVideo.current.srcObject = stream;
 
 			// Necessary because we need separate audio and getting it directly from the stream
 			// doesn't work. (Seems when using the stream directly, one HAS to record video/audio at once)
-			this.audio.srcObject = stream;
+			this.refAudio.current.srcObject = stream;
 		};
 
-		const handleError = (error) => {
+		const getUserMediaError = (error) => {
 			// TODO: Show a more generic pop up error (but include an error ID for debugging?) to user
 
 			if(error.name === 'ConstraintNotSatisfiedError') {
@@ -131,10 +109,9 @@ class Webcam extends React.Component {
 		};
 
 		navigator.mediaDevices.getUserMedia(constraints)
-		.then(handleSuccess)
-		.catch(handleError);
+		.then(getUserMediaSuccess)
+		.catch(getUserMediaError);
 
-		// Resize canvas to fill parent but keep aspect ratio
 		window.addEventListener('resize', () => {requestAnimationFrame(this.handleResize)});
 	};
 
@@ -142,7 +119,7 @@ class Webcam extends React.Component {
 	componentDidUpdate = () => {
 		this.renderer.stop();
 		this.renderer = new GLRenderer();
-		this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.video);
+		this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.refVideo.current);
 	};
 
 	// Resizes canvas while keeping aspect ratio
@@ -153,7 +130,7 @@ class Webcam extends React.Component {
 			// TODO: Would be nice to use cnv.parentNode as base for scale calculation instead of
 			// window but offsetWidth/-Height didn't work (reported dimensions a bit too small).
 			const scale = Math.min(
-				window.innerWidth / videoSettings.width, // TODO: replace fixed values with video resolution
+				window.innerWidth / videoSettings.width,
 				window.innerHeight / videoSettings.height
 			);
 
@@ -166,6 +143,14 @@ class Webcam extends React.Component {
 		return (
 			<StyledWebcam>
 				<StyledCanvas innerRef={this.refCanvas} />
+				<video autoPlay muted
+					onPlaying={this.videoPlaying}
+					ref={this.refVideo}
+					style={{width: '0px', height: '0px'}}
+				/>
+				<audio autoPlay muted
+					ref={this.refAudio}
+				/>
 			</StyledWebcam>
 		);
 	};
