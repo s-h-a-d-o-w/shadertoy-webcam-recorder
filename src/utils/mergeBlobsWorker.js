@@ -3,44 +3,62 @@
  * - Progress messages in the format of: {type: 'video'|'audio', progress: 0.0-1.0}
  * - When done, an array of streams suitable for ffmpeg's MEMFS input.
  *
- * @param msg {video: [Blob], audio: [Blob]}
+ * @param msg
+ * @param {Blob[]} msg.data.video
+ * @param {Blob[]} msg.data.audio
  */
-onmessage = (msg) => {
-	blobsToArrayBuffers({
+onmessage = async (msg) => {
+	const videoBuffer = arrayBufferConcat(await blobsToArrayBuffers({
 		type: 'video',
 		blobs: msg.data.video,
-	}).then((videoBuffers) => {
-		let videoBuffer = arrayBufferConcat(videoBuffers);
-		//console.log('videoBuffer done.');
+	}));
 
-		blobsToArrayBuffers({
-			type: 'audio',
-			blobs: msg.data.audio,
-		}).then((audioBuffers) => {
-			let audioBuffer = arrayBufferConcat(audioBuffers);
+	const audioBuffer = arrayBufferConcat(await blobsToArrayBuffers({
+		type: 'audio',
+		blobs: msg.data.audio,
+	}));
 
-			postMessage([
-				{name: "video.webm", data: new Uint8Array(videoBuffer)},
-				{name: "audio.webm", data: new Uint8Array(audioBuffer)},
-			]);
-		});
-	})
+	postMessage([
+		{name: "video.webm", data: new Uint8Array(videoBuffer)},
+		{name: "audio.webm", data: new Uint8Array(audioBuffer)},
+	]);
 };
 
+/**
+ * @param {Blob} blob
+ * @returns {Promise.<ArrayBuffer>}
+ */
+function blobToArrayBuffer(blob) {
+	const fileReader = new FileReader();
+
+	return new Promise((resolve, reject) => {
+		fileReader.onload = (e) => resolve(e.target.result);
+		fileReader.onerror = reject;
+
+		fileReader.readAsArrayBuffer(blob);
+	});
+}
+
+/**
+ * @param opts
+ * @param {string} opts.type 'video' or 'audio'
+ * @param {Blob[]} opts.blobs
+ * @returns {Promise.<ArrayBuffer[]>}
+ */
 function blobsToArrayBuffers(opts) {
-	let type = opts.type;
-	let blobs = opts.blobs;
+	const type = opts.type;
+	const blobs = opts.blobs;
 
 	let index = 0;
 	let progress = 0;
 	const buffers = [];
 
 	postMessage({type, progress});
-	return new Promise((resolve, reject) => {
-		function nextBlobToBuffer() {
+	return new Promise((resolve) => {
+		const nextBlobToBuffer = () => {
 			if(index < blobs.length) {
-				blobToArrayBuffer(blobs[index++]).then((e) => {
-					buffers.push(e.target.result);
+				blobToArrayBuffer(blobs[index++]).then((buffer) => {
+					buffers.push(buffer);
 
 					progress = index / blobs.length;
 
@@ -50,22 +68,15 @@ function blobsToArrayBuffers(opts) {
 			}
 			else
 				resolve(buffers);
-		}
+		};
 		nextBlobToBuffer();
 	});
 }
 
-function blobToArrayBuffer(blob) {
-	var fileReader = new FileReader();
-
-	return new Promise(function(resolve, reject) {
-		fileReader.onload = resolve;
-		fileReader.onerror = reject;
-
-		fileReader.readAsArrayBuffer(blob);
-	});
-};
-
+/**
+ * @param {ArrayBuffer[]} buffers
+ * @returns {ArrayBuffer}
+ */
 function arrayBufferConcat(buffers) {
 	// Create one array than can contain all buffers
 	const joined = new Uint8Array(
@@ -77,14 +88,10 @@ function arrayBufferConcat(buffers) {
 
 	// Copy all buffers to our single array
 	let offset = 0;
-	let buffer;
-	for(let i in buffers) {
-		buffer = buffers[i];
+	buffers.forEach(buffer => {
 		joined.set(new Uint8Array(buffer), offset);
 		offset += buffer.byteLength;
-	}
+	});
 
 	return joined.buffer;
 }
-
-
