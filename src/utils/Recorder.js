@@ -47,7 +47,7 @@ function init(opts) {
 				opts.onffmpegfailed();
 			}
 		};
-	}
+	};
 	loadffmpeg();
 }
 
@@ -93,7 +93,7 @@ function startRecording() {
 
 function stopRecording() {
 	console.log('Recorder.stopRecording()');
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		const isDone = {
 			audio: false,
 			video: false,

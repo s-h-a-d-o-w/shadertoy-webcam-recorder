@@ -21,33 +21,10 @@ const StyledCanvas = styled.canvas`
 `;
 
 class Webcam extends React.Component {
+	state = {startedRenderer: false};
 	refCanvas = React.createRef();
 	refVideo = React.createRef();
 	refAudio = React.createRef();
-	state = {startedRenderer: false};
-
-	// Kicks off canvas rendering once stream starts to play
-	videoPlaying = () => {
-		// Listener is trigger twice in quick succession - too quick
-		// for removeEventListener to finish in time.
-		// But this should only be executed once.
-		if(this.state.startedRenderer) return;
-		this.setState({startedRenderer: true});
-
-		console.log('Starting WebGL rendering');
-		this.renderer = new GLRenderer();
-		this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.refVideo.current);
-
-		// Capturing stream reduces framerate to ~30 FPS (at least on my machine) and can't be separated
-		// into a different thread
-		Recorder.init({
-			canvas: this.refCanvas.current,
-			fps: this.refVideo.current.srcObject.getVideoTracks()[0].getSettings().frameRate,
-			audio: this.refAudio.current,
-			onffmpegloaded: () => this.props.dispatch(ffmpegLoaded(true)),
-			onffmpegfailed: () => this.props.dispatch(ffmpegLoaded(false)),
-		});
-	};
 
 	componentDidMount = () => {
 		// Get webcam stream
@@ -115,11 +92,10 @@ class Webcam extends React.Component {
 		window.addEventListener('resize', () => {requestAnimationFrame(this.handleResize)});
 	};
 
-	// Usually only triggered by HMR, so let's restart renderer (to enable e.g. "shader HMR")
-	componentDidUpdate = () => {
+	// Needed for HMR
+	componentWillUnmount = () => {
 		this.renderer.stop();
-		this.renderer = new GLRenderer();
-		this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.refVideo.current);
+		this.renderer = null;
 	};
 
 	// Resizes canvas while keeping aspect ratio
@@ -136,6 +112,27 @@ class Webcam extends React.Component {
 
 			cnv.style.transform = `translate(-50%, -50%) scale(${scale})`;
 		}
+	};
+
+	// Kicks off canvas rendering once stream starts to play
+	videoPlaying = () => {
+		// Listener is trigger twice in quick succession but should only be executed once.
+		if(this.state.startedRenderer) return;
+		this.setState({startedRenderer: true});
+
+		console.log('Starting WebGL rendering');
+		this.renderer = new GLRenderer();
+		this.renderer.start(this.refCanvas.current.getContext('webgl2'), this.refVideo.current);
+
+		// Capturing stream reduces framerate to ~30 FPS (at least on my machine) and can't be separated
+		// into a different thread. So start it here to avoid sudden fps drop on Recording.
+		Recorder.init({
+			canvas: this.refCanvas.current,
+			fps: this.refVideo.current.srcObject.getVideoTracks()[0].getSettings().frameRate,
+			audio: this.refAudio.current,
+			onffmpegloaded: () => this.props.dispatch(ffmpegLoaded(true)),
+			onffmpegfailed: () => this.props.dispatch(ffmpegLoaded(false)),
+		});
 	};
 
 	render = () => {

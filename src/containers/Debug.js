@@ -2,16 +2,16 @@ import React from 'react';
 import styled from 'styled-components';
 import {connect} from 'react-redux';
 
-import RecordButton from '../components/RecordButton';
+import Stats from './Stats.js';
 
 const StyledDebug = styled.div`
 	/*
 		Hack to enable clicking of UI elements behind debug container:
 		https://stackoverflow.com/questions/1401658/html-overlay-which-allows-clicks-to-fall-through-to-elements-behind-it
 	*/
-	height:0px;
-	overflow:visible;
-	pointer-events:none;
+	height: 0;
+	overflow: visible;
+	pointer-events: none;
 
 	position: absolute;
 	top: 0;
@@ -37,6 +37,7 @@ const StyledDebug = styled.div`
 
 const Debug = (props) => (
 	<StyledDebug>
+		<Stats style={{left: '10px'}}/>
 		Debug Infos:<br/>
 		{
 			props.debugInfos &&

@@ -2,7 +2,7 @@
 // https://github.com/mdn/webgl-examples/blob/gh-pages/tutorial/sample5/webgl-demo.js
 // https://webglfundamentals.org/webgl/lessons/webgl-render-to-texture.html
 import mat4 from 'gl-mat4';
-import Stats from 'stats.js';
+import * as stats from '../containers/Stats.js';
 
 // Utility functions
 const isPowerOf2 = (value) => {
@@ -20,6 +20,7 @@ class GLRenderer {
 	}
 
 	start(gl, video) {
+		console.log('GLRenderer.start()');
 		// Could add gl context to 'this' but that would mean a LOT
 		// of 'this.gl' instead of simply 'gl' in here...
 
@@ -135,25 +136,16 @@ class GLRenderer {
 
 		//let texTemp = this._createTexture(gl, '720p-testpattern.png');
 
-
-		let stats = new Stats();
-		stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-		stats.domElement.style.left = '10px';
-		document.body.appendChild(stats.dom);
-
 		// Draw the scene repeatedly
 		const render = () => {
 			stats.begin();
 
 			if(this.isStopped) {
 				stats.end();
-				document.body.removeChild(stats.dom);
-				stats = null;
+				console.log('About to exit from renderer');
 				return;
 			}
 
-			// Fixed texture: 59 FPS
-			// Just streaming stuff from webcam without processing: Chrome 30 FPS, FF 30 FPS
 			this._drawScene(gl, programInfos, buffers, framebuffers, fbTextures, texWebcam); //, texTemp);
 
 			// Request animation frame in _updateTexture, since we should wait for the texture to have gotten uploaded
@@ -332,10 +324,11 @@ class GLRenderer {
 	 * Initializes shader programs.
 	 * Receives object containing vertex shader code and multiple fragment shader code fragments
 	 *
-	 * @param {GLContext} gl
+	 * @param {WebGLRenderingContext} gl
 	 * @param {Object} opts {vsSource, Array fsSources, Array numInputs}
 	 */
 	_initShaderPrograms(gl, opts) {
+		console.log('_initShaderPrograms()');
 		function boilerplate(numInputs) {
 			return `
 				precision mediump float;
