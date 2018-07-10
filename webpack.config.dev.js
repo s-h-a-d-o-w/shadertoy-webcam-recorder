@@ -11,18 +11,18 @@ const configDev = {
 		port: 3000,
 		stats: {
 			modules: false,
-		}
+		},
 	},
 	plugins: [
 		new webpack.NamedModulesPlugin(),
 		new webpack.HotModuleReplacementPlugin(),
 		new webpack.EvalSourceMapDevToolPlugin({
-			exclude: /ffmpeg/
+			exclude: /ffmpeg/,
 		}),
 		new webpack.DefinePlugin({
-			'PRODUCTION': JSON.stringify(false)
+			PRODUCTION: JSON.stringify(false),
 		}),
-	]
+	],
 };
 
 // Remove things from prod config that we don't want in dev

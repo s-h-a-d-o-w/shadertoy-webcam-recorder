@@ -54,7 +54,7 @@ const Debug = (props) => (
 const mapStateToProps = (state) => {
 	console.log('debuginfos: ' + (state.get('debugInfos') && state.get('debugInfos').toJS()));
 	return {
-		debugInfos: state.get('debugInfos')
+		debugInfos: state.get('debugInfos'),
 	};
 };
 

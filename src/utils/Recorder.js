@@ -32,7 +32,7 @@ function init(opts) {
 		ffmpegWorker = new Worker('ffmpeg-worker-webm.js'); // Copying of this script is specified manually in webpack config
 		ffmpegWorker.onmessage = (e) => {
 			const msg = e.data;
-			if(msg.type === "ready") {
+			if(msg.type === 'ready') {
 				console.log('ffmpeg loaded!');
 				opts.onffmpegloaded();
 			}
@@ -106,7 +106,7 @@ function stopRecording() {
 			isDone.video ? resolve() : isDone.audio = true;
 		};
 
-		recDuration = (new Date) - recStart;
+		recDuration = (new Date()) - recStart;
 		videoRecorder.stop();
 		audioRecorder.stop();
 	});
@@ -130,7 +130,7 @@ function getObjectURL(dispatch) {
 				// Resolve once worker is done merging video and audio
 				ffmpegWorker.onmessage = (e) => {
 					const ffmpegMsg = e.data;
-					if(ffmpegMsg.type === "stderr") {
+					if(ffmpegMsg.type === 'stderr') {
 						console.log('ffmpeg: ' + ffmpegMsg.data);
 
 						// ffmpeg reports progress containing time stamps.
@@ -140,7 +140,7 @@ function getObjectURL(dispatch) {
 
 							let muxProgress = Date.parse(`1970-01-01T${ffmpegTime}0Z`) / recDuration;
 							if(muxProgress > 1)
-							muxProgress = 1;
+								muxProgress = 1;
 
 							// ffmpeg muxing uses progress range 60-100%
 							dispatch(progress(Math.round((muxProgress * 0.4 + 0.6) * 100)));
@@ -157,7 +157,7 @@ function getObjectURL(dispatch) {
 							dispatch(progress(60));
 						}
 					}
-					else if(ffmpegMsg.type === "done") {
+					else if(ffmpegMsg.type === 'done') {
 						resolve(window.URL.createObjectURL(new Blob([ffmpegMsg.data.MEMFS[0].data.buffer])));
 					}
 				};
@@ -166,15 +166,15 @@ function getObjectURL(dispatch) {
 
 				console.log('before sending to ffmpeg.');
 				ffmpegWorker.postMessage({
-					type: "run",
+					type: 'run',
 					MEMFS: msg.data,
 					arguments: [
 						'-i', 'video.webm',
 						'-i', 'audio.webm',
 						'-c:v', 'copy',
 						'-c:a', 'copy',
-						'output.webm'
-					]
+						'output.webm',
+					],
 				});
 				console.log('after sending to ffmpeg.');
 			}

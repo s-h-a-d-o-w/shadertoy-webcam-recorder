@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 
 const reducer = (state, action) => {
-	switch (action.type) {
+	switch(action.type) {
 		case 'ADD_DEBUG_INFO':
 			return state.set(
 				'debugInfos',

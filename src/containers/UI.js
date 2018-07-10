@@ -25,27 +25,27 @@ const StyledUI = styled.div`
 
 const UI = (props) => (
 	<StyledUI {...props}>
-	{
-		props.ffmpegLoaded === undefined ? (
-			<Button>LOADING</Button>
-		) : (
-			props.ffmpegLoaded ? (
-				props.isProcessing ? (
-					//<Button>PROCESSING</Button>
-					<Button style={{flexDirection: 'column'}}>
-						<div>PROCESSING</div>
-						<div style={{fontSize: '2vmin', paddingTop: '0.5vmin'}}>
-							{props.progress ? props.progress : 0}%
-						</div>
-					</Button>
-				) : (
-					<RecordButton />
-				)
+		{
+			props.ffmpegLoaded === undefined ? (
+				<Button>LOADING</Button>
 			) : (
-				<Button>RECORDING UNAVAILABLE</Button>
+				props.ffmpegLoaded ? (
+					props.isProcessing ? (
+						//<Button>PROCESSING</Button>
+						<Button style={{flexDirection: 'column'}}>
+							<div>PROCESSING</div>
+							<div style={{fontSize: '2vmin', paddingTop: '0.5vmin'}}>
+								{props.progress ? props.progress : 0}%
+							</div>
+						</Button>
+					) : (
+						<RecordButton />
+					)
+				) : (
+					<Button>RECORDING UNAVAILABLE</Button>
+				)
 			)
-		)
-	}
+		}
 	</StyledUI>
 );
 

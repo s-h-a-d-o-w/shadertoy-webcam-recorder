@@ -25,10 +25,10 @@ const config = {
 				uglifyOptions: {
 					compress: {
 						drop_console: true,
-					}
-				}
-			})
-		]
+					},
+				},
+			}),
+		],
 	},
 
 	// Each entry has an array assigned so that webpack-hot-middleware can be merged into it in dev.
@@ -49,20 +49,20 @@ const config = {
 		}, {
 			from: path.resolve(__dirname, 'src/utils/mergeBlobsWorker.js'),
 			to: path.resolve(__dirname, 'dist/mergeBlobsWorker.js'),
-		}/*, {
+		}, /*, {
 			from: path.resolve(__dirname, 'assets'),
 			to: path.resolve(__dirname, 'dist/assets'),
 		}*/
 		]),
 		new webpack.DefinePlugin({
-			'PRODUCTION': JSON.stringify(true)
+			PRODUCTION: JSON.stringify(true),
 		}),
 	],
 	output: {
 		filename: '[name].bundle.js',
 		chunkFilename: '[name].bundle.js',
 		path: path.resolve(__dirname, 'dist'),
-		publicPath: '/'
+		publicPath: '/',
 	},
 	module: {
 		noParse: /ffmpeg/,
@@ -74,29 +74,29 @@ const config = {
 			],
 		}, {
 			test: /\.css$/,
-			use: ['style-loader', 'css-loader']
+			use: ['style-loader', 'css-loader'],
 		}, {
 			// See: https://survivejs.com/webpack/loading/fonts/
 			// Match woff2 in addition to patterns like .woff?v=1.1.1.
 			test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
 			use: {
-				loader: "url-loader",
+				loader: 'url-loader',
 				options: {
 					// Limit at 50k. Above that it emits separate files
 					limit: 50000,
 
 					// url-loader sets mimetype if it's passed.
 					// Without this it derives it from the file extension
-					mimetype: "application/font-woff",
+					mimetype: 'application/font-woff',
 
 					// Output below fonts directory
-					name: "./fonts/[name].[ext]",
-				}
-			}
+					name: './fonts/[name].[ext]',
+				},
+			},
 		}, {
 			test: /\.(ttf|eot)$/,
 			use: {
-				loader: "url-loader",
+				loader: 'url-loader',
 				options: {
 					limit: 50000,
 				},

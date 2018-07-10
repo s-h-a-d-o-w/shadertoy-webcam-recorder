@@ -7,7 +7,7 @@
  * @param {Blob[]} msg.data.video
  * @param {Blob[]} msg.data.audio
  */
-onmessage = async (msg) => {
+onmessage = async(msg) => {
 	const videoBuffer = arrayBufferConcat(await blobsToArrayBuffers({
 		type: 'video',
 		blobs: msg.data.video,
@@ -19,8 +19,8 @@ onmessage = async (msg) => {
 	}));
 
 	postMessage([
-		{name: "video.webm", data: new Uint8Array(videoBuffer)},
-		{name: "audio.webm", data: new Uint8Array(audioBuffer)},
+		{name: 'video.webm', data: new Uint8Array(videoBuffer)},
+		{name: 'audio.webm', data: new Uint8Array(audioBuffer)},
 	]);
 };
 

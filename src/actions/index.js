@@ -30,7 +30,7 @@ export const startRecording = () => {
 	return {
 		type: 'IS_RECORDING',
 		value: true,
-	}
+	};
 };
 
 export const stopRecording = () => {
@@ -69,7 +69,7 @@ export const stopRecording = () => {
 			}, 500);
 		})
 		.catch(e => console.error(e)); // TODO: Provide feedback to user
-	}
+	};
 };
 
 export const webcamAccess = (value) => ({

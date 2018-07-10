@@ -36,7 +36,7 @@ class Webcam extends React.Component {
 				width: {ideal: 1920}, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
 				height: {ideal: 1080},
 				frameRate: {ideal: 30}, // 60 fps might be possible on some devices but... see 4K above.
-			}
+			},
 
 			// video: {
 			// 	width: {ideal: 640}, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
@@ -78,7 +78,8 @@ class Webcam extends React.Component {
 			if(error.name === 'ConstraintNotSatisfiedError') {
 				console.error('The resolution ' + constraints.video.width.exact + 'x' +
 					constraints.video.height.exact + ' px is not supported by your device.');
-			} else if(error.name === 'PermissionDeniedError') {
+			}
+			else if(error.name === 'PermissionDeniedError') {
 				console.error('Permissions have not been granted to use your camera and ' +
 					'microphone, you need to allow the page access to your devices in ' +
 					'order for the demo to work.');

@@ -1,12 +1,12 @@
 import React from 'react';
 import {render} from 'react-dom';
-import Immutable from "immutable";
+import Immutable from 'immutable';
 import {Provider} from 'react-redux';
 import {createStore, applyMiddleware, compose} from 'redux';
 import thunk from 'redux-thunk';
 
 import App from './components/App.js';
-import rootReducer from './reducers'
+import rootReducer from './reducers';
 import initialState from './store/initialState';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
