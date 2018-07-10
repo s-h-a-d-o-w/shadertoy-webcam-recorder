@@ -32,6 +32,6 @@ const Lightbox = (props) => (
 		<Blackout/>
 		<Text>{props.children}</Text>
 	</CenterAligned>
-)
+);
 
 export default Lightbox;

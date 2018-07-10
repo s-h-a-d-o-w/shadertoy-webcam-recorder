@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 
 // Heroku sets PORT as environment variable automatically
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 3000;
 
 console.log('Using production bundle');
 app.use(compression());

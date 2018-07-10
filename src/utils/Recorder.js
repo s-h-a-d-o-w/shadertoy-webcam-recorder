@@ -84,9 +84,9 @@ function startRecording() {
 	// Need to keep track of video duration ourselves, not easy to find out otherwise.
 	recStart = new Date();
 
-	// Collect 300 ms chunks of data
-	videoRecorder.start(300);
-	audioRecorder.start(300);
+	// Collect X ms chunks of data
+	videoRecorder.start(1000);
+	audioRecorder.start(1000);
 
 	console.log('MediaRecorder started', videoRecorder);
 }
@@ -115,7 +115,7 @@ function stopRecording() {
 /**
 	Uses ffmpeg.js web worker version to merge video and audio streams.
 
-	@return {DOMString} Represents the blob of the recorded webm file
+	@return {Promise.<string>} Represents the blob of the recorded webm file
  */
 function getObjectURL(dispatch) {
 	console.log('getObjectURL()');

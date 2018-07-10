@@ -23,7 +23,7 @@ const configDev = {
 			'PRODUCTION': JSON.stringify(false)
 		}),
 	]
-}
+};
 
 // Remove things from prod config that we don't want in dev
 // -----------------------------------------------------------

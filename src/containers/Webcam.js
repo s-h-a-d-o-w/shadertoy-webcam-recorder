@@ -31,18 +31,19 @@ class Webcam extends React.Component {
 		const constraints = {
 			audio: true,
 			// TODO: Possible problem on Chrome (desktop): Unlike Firefox, user doesn't get prompted to choose which camera to use
+
 			video: {
 				width: {ideal: 1920}, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
 				height: {ideal: 1080},
 				frameRate: {ideal: 30}, // 60 fps might be possible on some devices but... see 4K above.
 			}
-			/*
-			video: {
-				width: {ideal: 640}, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
-				height: {ideal: 480},
-				frameRate: {ideal: 30}, // 60 fps might be possible on some devices but... see 4K above.
-			}
-			*/
+
+			// video: {
+			// 	width: {ideal: 640}, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
+			// 	height: {ideal: 480},
+			// 	frameRate: {ideal: 30}, // 60 fps might be possible on some devices but... see 4K above.
+			// }
+
 		};
 
 		const getUserMediaSuccess = (stream) => {
@@ -106,8 +107,8 @@ class Webcam extends React.Component {
 			// TODO: Would be nice to use cnv.parentNode as base for scale calculation instead of
 			// window but offsetWidth/-Height didn't work (reported dimensions a bit too small).
 			const scale = Math.min(
-				window.innerWidth / videoSettings.width,
-				window.innerHeight / videoSettings.height
+				innerWidth / videoSettings.width,
+				innerHeight / videoSettings.height
 			);
 
 			cnv.style.transform = `translate(-50%, -50%) scale(${scale})`;

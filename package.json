@@ -4,9 +4,6 @@
   "main": "main.js",
   "author": "Andreas Opferkuch <s-h-a-d-o-w@users.noreply.github.com>",
   "license": "MIT",
-  "engines": {
-    "node": "^8.0.0"
-  },
   "scripts": {
     "heroku-postbuild": "npm run build",
     "build": "webpack",

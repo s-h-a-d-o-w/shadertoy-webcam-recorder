@@ -6,7 +6,7 @@ import * as stats from '../containers/Stats.js';
 
 // Utility functions
 const isPowerOf2 = (value) => {
-	return (value & (value - 1)) == 0;
+	return (value & (value - 1)) === 0;
 };
 
 /**
@@ -45,7 +45,7 @@ class GLRenderer {
 		const fsSources = [`
 			#define steps 2.
 			void main(void) {
-
+/*
 				vec2 uv = vTextureCoord;
 				vec4 c = texture2D(iChannel0, uv);
 				float g = max(c.r, max(c.g,c.b)) * steps;
@@ -57,14 +57,14 @@ class GLRenderer {
 					c.r = floor(g);
 				c.r /= steps;
 				gl_FragColor = c.rrra;
-
+*/
 
 				/*
 				vec4 texel = texture2D(iChannel0, vTextureCoord);
 				gl_FragColor = vec4(1.0 - texel.x, 1.0 - texel.y, 1.0 - texel.z, 1.0);
 				*/
 
-				//gl_FragColor = texture2D(iChannel0, vTextureCoord);
+				gl_FragColor = texture2D(iChannel0, vTextureCoord);
 			}
 			`,`
 			void main(void) {
@@ -138,6 +138,7 @@ class GLRenderer {
 
 		// Draw the scene repeatedly
 		const render = () => {
+			stats.end();
 			stats.begin();
 
 			if(this.isStopped) {
@@ -153,9 +154,8 @@ class GLRenderer {
 			// Also: There's no way of getting notified when the next video frame is done. So... grab the next one
 			// as quickly as possible - which may lead to unnecessary 60 FPS rendering for a 30 FPS video stream...
 			this._updateTexture(gl, texWebcam, video, render);
-
-			stats.end();
 		};
+		stats.begin();
 		requestAnimationFrame(render);
 	}
 
@@ -336,8 +336,7 @@ class GLRenderer {
 
 			` +
 				(new Array(numInputs))
-				.fill()
-				//.map((elem, idx) => `uniform sampler2D iChannel${idx};`)
+				.fill(undefined)
 				.map((elem, idx) => `uniform sampler2D iChannel${idx};`)
 				.join('\n');
 		}
@@ -460,7 +459,7 @@ class GLRenderer {
 	/**
 	 * Initializes webcam, gets mediastream
 	 *
-	 * @returns texture
+	 * @returns {WebGLTexture}
 	 */
 	_createTexture(gl, url) {
 		const texture = gl.createTexture();

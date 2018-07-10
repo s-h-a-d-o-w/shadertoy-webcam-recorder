@@ -6,8 +6,8 @@ const stats = new Stats();
 class StatsWrapper extends React.Component {
 	wrapperRef = React.createRef();
 
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 
 		stats.showPanel(0);
 		stats.dom.style.left = '10px';

@@ -16,15 +16,10 @@ const StyledApp = styled.div`
 		font-family: DSEG14-Classic;
 		/* Since fonts are inlined and .woff has 95% support, might as well only use supply that one */
 		src: url(${DSEG14woff}) format('woff');
-		font-weight: normal;
-		font-style: normal;
 	}
 	@font-face {
 		font-family: Montserrat;
-		/* Since fonts are inlined and .woff has 95% support, might as well only use supply that one */
 		src: url(${MontserratLight}) format('woff');
-		font-weight: lighter;
-		font-style: normal;
 	}
 
 	position:absolute;
@@ -33,8 +28,7 @@ const StyledApp = styled.div`
 	height: 100%;
 	background-color: dimgray;
 
-	font-family: Montserrat;
-	font-weight: lighter;
+	font-family: Montserrat, sans-serif;
 	font-size: 3vmin;
 	color: white;
 `;
