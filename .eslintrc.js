@@ -66,5 +66,6 @@ module.exports = {
 
 		// REACT
 		'react/prop-types': 'off',
+		'react/no-access-state-in-setstate': 'error',
 	}
 };

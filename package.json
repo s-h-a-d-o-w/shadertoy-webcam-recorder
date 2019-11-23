@@ -5,9 +5,8 @@
   "author": "Andreas Opferkuch <s-h-a-d-o-w@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "heroku-postbuild": "npm run build",
     "build": "webpack",
-    "start": "npm run build && cross-env NODE_ENV=production node .",
+    "start": "cross-env NODE_ENV=production node .",
     "start:dev": "webpack-dev-server --config webpack.config.dev.js --https --pfx=./cert.pfx",
     "start:analyzer": "cross-env BUNDLE_ANALYZER=true webpack"
   },
