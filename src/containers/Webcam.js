@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import GLRenderer from '../utils/GLRenderer.js';
 import * as Recorder from '../utils/Recorder.js';
 
-import {connect} from 'react-redux';
-import {addDebugInfo, ffmpegLoaded, hideLightbox, webcamAccess} from '../actions';
+import { connect } from 'react-redux';
+import { addDebugInfo, ffmpegLoaded, hideLightbox, webcamAccess } from '../actions';
 
 const StyledWebcam = styled.div`
 	position: absolute;
@@ -21,7 +21,10 @@ const StyledCanvas = styled.canvas`
 `;
 
 class Webcam extends React.Component {
-	state = {startedRenderer: false};
+	state = {
+		hasMediaDevices: true,
+		startedRenderer: false,
+	};
 	refCanvas = React.createRef();
 	refVideo = React.createRef();
 	refAudio = React.createRef();
@@ -33,9 +36,9 @@ class Webcam extends React.Component {
 			// TODO: Possible problem on Chrome (desktop): Unlike Firefox, user doesn't get prompted to choose which camera to use
 
 			video: {
-				width: {ideal: 1920}, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
-				height: {ideal: 1080},
-				frameRate: {ideal: 30}, // 60 fps might be possible on some devices but... see 4K above.
+				width: { ideal: 1920 }, // 4K would be possible with Chrome on phones but... too much for the browser to handle :/
+				height: { ideal: 1080 },
+				frameRate: { ideal: 30 }, // 60 fps might be possible on some devices but... see 4K above.
 			},
 
 			// video: {
@@ -87,9 +90,14 @@ class Webcam extends React.Component {
 			console.error('getUserMedia error: ' + error.name, error);
 		};
 
-		navigator.mediaDevices.getUserMedia(constraints)
-		.then(getUserMediaSuccess)
-		.catch(getUserMediaError);
+		if(navigator.mediaDevices) {
+			navigator.mediaDevices.getUserMedia(constraints)
+			.then(getUserMediaSuccess)
+			.catch(getUserMediaError);
+		}
+		else {
+			this.setState({ hasMediaDevices: false });
+		}
 
 		window.addEventListener('resize', () => {requestAnimationFrame(this.handleResize)});
 	};
@@ -120,7 +128,7 @@ class Webcam extends React.Component {
 	videoPlaying = () => {
 		// Listener is trigger twice in quick succession but should only be executed once.
 		if(this.state.startedRenderer) return;
-		this.setState({startedRenderer: true});
+		this.setState({ startedRenderer: true });
 
 		console.log('Starting WebGL rendering');
 		this.renderer = new GLRenderer();
@@ -139,19 +147,19 @@ class Webcam extends React.Component {
 
 	render = () => {
 		console.log('render');
-		return (
+		return this.state.hasMediaDevices ? (
 			<StyledWebcam>
 				<StyledCanvas innerRef={this.refCanvas} />
 				<video autoPlay muted
 					onPlaying={this.videoPlaying}
 					ref={this.refVideo}
-					style={{width: '0px', height: '0px'}}
+					style={{ width: '0px', height: '0px' }}
 				/>
 				<audio autoPlay muted
 					ref={this.refAudio}
 				/>
 			</StyledWebcam>
-		);
+		) : <div>No media devices could be detected. (Are you possibly trying to access via HTTP? Chrome requires HTTPS.)</div>;
 	};
 }
 
